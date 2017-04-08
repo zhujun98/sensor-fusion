@@ -10,14 +10,14 @@
 #include "utilities.h"
 
 
-class Fusion_EKF {
+class FusionEKF {
 public:
 
   // Constructor
-  Fusion_EKF();
+  FusionEKF();
 
   // Destructor
-  virtual ~Fusion_EKF();
+  virtual ~FusionEKF();
 
   // KalmanFilter() object.
   KalmanFilter ekf_;

@@ -27,6 +27,7 @@ public:
 
   //
   // Convert polar coordinates to Cartesian coordinates.
+  // Only used in the initialization of FusionEKF().
   //
   Eigen::VectorXd Polar2Cartesian(const Eigen::VectorXd &x);
 

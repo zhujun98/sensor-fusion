@@ -4,7 +4,7 @@
 #include "Eigen/Dense"
 
 
-Fusion_EKF::Fusion_EKF() {
+FusionEKF::FusionEKF() {
 
   is_initialized_ = false;
   previous_timestamp_ = 0;
@@ -23,25 +23,20 @@ Fusion_EKF::Fusion_EKF() {
             0, 0, 1, 0,
             0, 0, 0, 1;
 
-  //measurement matrix
-  ekf_.h_ = Eigen::MatrixXd(4, 4);
+  //measurement matrix for the basic Kalman fiter
+  ekf_.h_ = Eigen::MatrixXd(2, 4);
   ekf_.h_ << 1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1;
+            0, 1, 0, 0;
 
   //measurement covariance matrices
-  r_lidar_ = Eigen::MatrixXd(4, 4);
-  r_lidar_ << 0.0225, 0, 0, 0,
-              0, 0.0225, 0, 0,
-              0, 0, 10, 0,
-              0, 0, 0, 10;
+  r_lidar_ = Eigen::MatrixXd(2, 2);
+  r_lidar_ << 0.0225, 0,
+              0, 0.0225;
 
-  r_radar_ = Eigen::MatrixXd(4, 4);
-  r_radar_ << 0.09, 0, 0, 0,
-              0, 0.0009, 0, 0,
-              0, 0, 0.09, 0,
-              0, 0, 0, 10;
+  r_radar_ = Eigen::MatrixXd(3, 3);
+  r_radar_ << 0.09, 0, 0,
+              0, 0.0009, 0,
+              0, 0, 0.09;
 
   //set the acceleration noise components
   noise_ax_ = 9;
@@ -49,9 +44,9 @@ Fusion_EKF::Fusion_EKF() {
 
 }
 
-Fusion_EKF::~Fusion_EKF() {}
+FusionEKF::~FusionEKF() {}
 
-void Fusion_EKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
+void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   // Initialization
   if (!is_initialized_) {
@@ -59,10 +54,10 @@ void Fusion_EKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) 
     ekf_.x_ = Eigen::VectorXd(4);
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
-      Eigen::VectorXd x_polar(4);
+      Eigen::VectorXd x_polar(3);
       x_polar << measurement_pack.raw_measurements_[0],
           measurement_pack.raw_measurements_[1],
-          measurement_pack.raw_measurements_[2], 0;
+          measurement_pack.raw_measurements_[2];
 
       // Convert positions and velocities from polar to cartesian coordinates.
       Utilities utilities;

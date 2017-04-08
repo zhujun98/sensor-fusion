@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
 
     // reads first element from the current line
     iss >> sensor_type;
-    meas_package.raw_measurements_ = Eigen::VectorXd(4);
+
     if (sensor_type.compare("L") == 0) {
       // LIDAR MEASUREMENT
       meas_package.sensor_type_ = MeasurementPackage::LIDAR;
@@ -99,7 +99,8 @@ int main(int argc, char* argv[]) {
       float y;
       iss >> x;
       iss >> y;
-      meas_package.raw_measurements_ << x, y, 0, 0;
+      meas_package.raw_measurements_ = Eigen::VectorXd(2);
+      meas_package.raw_measurements_ << x, y;
     } else if (sensor_type.compare("R") == 0) {
       // RADAR MEASUREMENT
       meas_package.sensor_type_ = MeasurementPackage::RADAR;
@@ -113,8 +114,8 @@ int main(int argc, char* argv[]) {
 
       // Normalize the angle to (-pi, pi]
       normalize_angle(phi);
-
-      meas_package.raw_measurements_ << rho, phi, v_rho, 0;
+      meas_package.raw_measurements_ = Eigen::VectorXd(3);
+      meas_package.raw_measurements_ << rho, phi, v_rho;
     }
 
     // read timestamp for both LIDAR and RADAR
@@ -138,7 +139,7 @@ int main(int argc, char* argv[]) {
   }
 
   // Create a Fusion EKF instance
-  Fusion_EKF fusion_ekf;
+  FusionEKF fusion_ekf;
 
   // used to compute the RMSE later
   std::vector<Eigen::VectorXd> estimations;
