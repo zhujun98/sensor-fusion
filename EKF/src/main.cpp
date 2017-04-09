@@ -22,7 +22,8 @@ void check_arguments(int argc, char* argv[]) {
   if (argc == 1) {
     std::cerr << usage_instructions << std::endl;
   } else if (argc == 2) {
-    std::cerr << "Please include an output file.\n" << usage_instructions << std::endl;
+    std::cerr << "Please include an output file.\n" << usage_instructions
+              << std::endl;
   } else if (argc == 3) {
     has_valid_args = true;
   } else if (argc > 3) {
@@ -163,7 +164,8 @@ int main(int argc, char* argv[]) {
       // output the estimation
       out_file_ << measurement_pack_list[k].raw_measurements_(0) << "\t";
       out_file_ << measurement_pack_list[k].raw_measurements_(1) << "\t";
-    } else if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::RADAR) {
+    } else if (measurement_pack_list[k].sensor_type_
+               == MeasurementPackage::RADAR) {
       // output the estimation in the cartesian coordinates
       float rho = measurement_pack_list[k].raw_measurements_(0);
       float phi = measurement_pack_list[k].raw_measurements_(1);
@@ -183,7 +185,7 @@ int main(int argc, char* argv[]) {
 
   // compute the accuracy (RMSE)
   Utilities utilities;
-  std::cout << "Accuracy - RMSE:" << std::endl
+  std::cout << "Estimation accuracy - RMSE:" << std::endl
             << utilities.CalculateRMSE(estimations, ground_truth) << std::endl;
 
   // close files

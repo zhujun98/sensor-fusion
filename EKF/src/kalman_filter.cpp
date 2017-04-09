@@ -28,11 +28,13 @@ void KalmanFilter::Update(const Eigen::VectorXd &z, const Eigen::MatrixXd &r) {
 
 }
 
-void KalmanFilter::UpdateEKF(const Eigen::VectorXd &z, const Eigen::MatrixXd &r) {
+void KalmanFilter::UpdateEKF(const Eigen::VectorXd &z,
+                             const Eigen::MatrixXd &r) {
 
   Utilities utilities;
 
   Eigen::MatrixXd h_j = utilities.CalculateJacobian(x_);
+
   Eigen::MatrixXd h_t = h_j.transpose();
   Eigen::MatrixXd s = h_j*p_*h_t + r;
   Eigen::MatrixXd s_i = s.inverse();
