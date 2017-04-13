@@ -7,7 +7,7 @@
 FusionEKF::FusionEKF() {
 
   is_initialized_ = false;
-  previous_timestamp_ = 0;
+  time_us_ = 0;
 
   //state covariance matrix
   ekf_.p_ = Eigen::MatrixXd(4, 4);
@@ -67,15 +67,14 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
           measurement_pack.raw_measurements_[1], 0, 0;
     }
 
-    previous_timestamp_ = measurement_pack.timestamp_;
+    time_us_ = measurement_pack.timestamp_;
     is_initialized_ = true;
     return;
   }
 
   // Compute the time elapsed between the current and previous measurements
-  double dt = (measurement_pack.timestamp_ - previous_timestamp_)
+  double dt = (measurement_pack.timestamp_ - time_us_)
               / 1000000.0;  // In second
-  previous_timestamp_ = measurement_pack.timestamp_;
 
   // Update the state transition matrix f according to the new elapsed time.
   ekf_.f_(0, 2) = dt;
@@ -93,18 +92,21 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
             dt_3/2*noise_ax_, 0, dt_2*noise_ax_, 0,
             0, dt_3/2*noise_ay_, 0, dt_2*noise_ay_;
 
-  // Prediction
-  ekf_.Predict();
-
-  // Measurement update
+  // Prediction and Measurement updating
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // Skip updating when near the origin.
     double rho = ekf_.x_[0]*ekf_.x_[0] + ekf_.x_[1]*ekf_.x_[1];
     if (rho > 1e-12) {
-      ekf_.UpdateEKF(measurement_pack.raw_measurements_, r_radar_);
+      ekf_.EKF(measurement_pack.raw_measurements_, r_radar_);
+    } else {
+      return;
     }
   } else {
-    ekf_.Update(measurement_pack.raw_measurements_, r_lidar_);
+    ekf_.KF(measurement_pack.raw_measurements_, r_lidar_);
   }
+
+  // The latest time update should be put here since the update may
+  // be skipped, e.g. for the RADAR measurement.
+  time_us_ = measurement_pack.timestamp_;
 
 }

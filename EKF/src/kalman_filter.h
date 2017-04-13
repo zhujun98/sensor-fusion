@@ -3,8 +3,8 @@
 #include "Eigen/Dense"
 
 class KalmanFilter {
-public:
 
+public:
   // state vector
   Eigen::VectorXd x_;
 
@@ -27,21 +27,23 @@ public:
   virtual ~KalmanFilter();
 
   //
+  // A full cycle (prediction + measurement update)
+  // using standard Kalman Filter equations
+  //
+  void KF(const Eigen::VectorXd &z, const Eigen::MatrixXd &r);
+
+  //
+  // A full cycle (prediction + measurement update)
+  // using extended Kalman Filter equations
+  //
+  void EKF(const Eigen::VectorXd &z, const Eigen::MatrixXd &r);
+
+private:
+  //
   // Prediction Predicts the state and the state covariance
   // using the process model
   //
   void Predict();
-
-  //
-  // Measurement update using standard Kalman Filter equations
-  //
-  void Update(const Eigen::VectorXd &z, const Eigen::MatrixXd &r);
-
-  //
-  // Measurement update using extended Kalman Filter equations
-  //
-  void UpdateEKF(const Eigen::VectorXd &z, const Eigen::MatrixXd &r);
-
 };
 
 #endif /* KALMAN_FILTER_H_ */

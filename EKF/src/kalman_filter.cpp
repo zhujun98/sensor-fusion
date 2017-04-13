@@ -14,8 +14,11 @@ void KalmanFilter::Predict() {
   p_ = f_*p_*f_t + q_;
 }
 
-void KalmanFilter::Update(const Eigen::VectorXd &z, const Eigen::MatrixXd &r) {
+void KalmanFilter::KF(const Eigen::VectorXd &z, const Eigen::MatrixXd &r) {
 
+  Predict();
+
+  // Measurement update
   Eigen::MatrixXd h_t = h_.transpose();
   Eigen::MatrixXd s = h_*p_*h_t + r;
   Eigen::MatrixXd s_i = s.inverse();
@@ -28,9 +31,12 @@ void KalmanFilter::Update(const Eigen::VectorXd &z, const Eigen::MatrixXd &r) {
 
 }
 
-void KalmanFilter::UpdateEKF(const Eigen::VectorXd &z,
+void KalmanFilter::EKF(const Eigen::VectorXd &z,
                              const Eigen::MatrixXd &r) {
 
+  Predict();
+
+  // Measurement update
   Utilities utilities;
 
   Eigen::MatrixXd h_j = utilities.CalculateJacobian(x_);

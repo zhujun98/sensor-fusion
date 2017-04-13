@@ -40,8 +40,8 @@ private:
   // (first measurement)
   bool is_initialized_;
 
-  // Previous timestamp
-  long previous_timestamp_;
+  // time when the state is true, in us
+  long long time_us_;
 
   // Acceleration noise components
   float noise_ax_;
