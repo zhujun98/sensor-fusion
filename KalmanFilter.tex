@@ -1,6 +1,13 @@
 \documentclass[12pt]{article}
+
+\title{Sensor Fusion with Kalman Filter}
+\author{Jun Zhu}
+\date{\today}
+
 \usepackage{lmodern}
 \usepackage{amsmath, amsthm, amssymb, amsfonts}
+\usepackage{graphicx}
+\usepackage{grffile}
 
 \usepackage{geometry}
 \geometry{
@@ -40,10 +47,9 @@
 \usepackage{indentfirst}
 \setlength{\parindent}{0.75cm}
 
-\begin{document}
 
-\title{Sensor Fusion with Kalman Filter}
-\author{Jun Zhu April 08, 2017}
+\begin{document}
+\maketitle
 
 %%%-------------------------------------------------------------------------%%%
 %%%-------------------------------------------------------------------------%%%
@@ -65,7 +71,7 @@ where \(\mathbf{x}_{k} \in \mathfrak{R}^{n}\) is the state vector and \(\mathbf{
 %
 where \(\mathbf{z}_{k} \in \mathfrak{R}^{m}\) is the measurement vector and \(\mathbf{\nu}\sim N( 0,\mathbf{R})\) is the process noise with \(\mathbf{R}\) the covariance matrix.
 
-The equations used in the Kalman filter are listed in Table~\ref{tab:table-KF}. Here \(\mathbf{P}_{k}^{-}\) and \(\mathbf{P}_{k}\) are the priori and posteriori error covariance matrix, respectively, \(\mathbf{z}_{k} - \mathbf{H}\mathbf{x}_{k}^{-}\) is called the measurement innovation, and \(\mathbf{K}_{k}\) is chosen to minimize the posteriori error covariance.
+The equations used in the Kalman filter are listed in Table~\ref{tab:table-KF} \cite{Welch}. Here \(\mathbf{P}_{k}^{-}\) and \(\mathbf{P}_{k}\) are the priori and posteriori error covariance matrix, respectively, \(\mathbf{z}_{k} - \mathbf{H}\mathbf{x}_{k}^{-}\) is called the measurement innovation, and \(\mathbf{K}_{k}\) is chosen to minimize the posteriori error covariance.
 
 \begin{table}[h]
 	\renewcommand{\arraystretch}{1.5}
@@ -92,7 +98,7 @@ The equations used in the Kalman filter are listed in Table~\ref{tab:table-KF}. 
 In the LIDAR measurement, the state vector \(\mathbf{x}_{k}\) is given by
 %
 \begin{equation}
-	\mathbf{x}_{k} = \begin{bmatrix}x & y & \dot{x} & \dot{y}\end{bmatrix}^{T}.
+	\mathbf{x}_{k} = \begin{bmatrix} p_{x} & p_{y} & v_{x} & v_{y}\end{bmatrix}^{T}.
 \end{equation}
 %
 Assuming a linear motion, we have
@@ -106,7 +112,7 @@ Assuming a linear motion, we have
 	\end{bmatrix},
 \end{equation}
 %
-where \(\Delta t\) is the time step. The measurement vector is \(\mathbf{z}_{k} = \begin{bmatrix} x & y \end{bmatrix}^{T}\), and the measurement matrix is simply
+where \(\Delta t\) is the time step. The measurement vector is \(\mathbf{z}_{k} = \begin{bmatrix} p_{x} & p_{y} \end{bmatrix}^{T}\), and the measurement matrix is simply
 %
 \begin{equation}
 	\mathbf{H} = \begin{bmatrix}
@@ -134,7 +140,7 @@ and/or the measurement function
 %
 are nonlinear.
 
-The equations used in the extended Kalman filter are summarized in Table 2. Here, \(\mathbf{F}\) is the Jacobian matrix of partial derivatives of \(\mathbf{f}\) with respect to \(\mathbf{x}\), which gives
+The equations used in the extended Kalman filter are summarized in Table 2 \cite{Welch}. Here, \(\mathbf{F}\) is the Jacobian matrix of partial derivatives of \(\mathbf{f}\) with respect to \(\mathbf{x}\), which gives
 %
 \begin{equation}
 	F_{i,j} = \frac{\partial f_{i}}{\partial x_{j}}.
@@ -192,7 +198,7 @@ The RADAR measurement returns
 in the polar coordination system, which means the mapping from the state vector \(\mathbf{x}_{\mathbf{k}}\) to the measurement vector \(\mathbf{z}_{\mathbf{k}}\) is no longer linear. The transform equations from the Cartesian coordinate system to the polar coordinate system (\(\mathbf{h}\)) are given by
 %
 \begin{equation}
-	\rho = \sqrt{x^{2} + y^{2}},\ \varphi = \arctan( \frac{y}{x}),\ 	\dot{\rho} = \frac{x\dot{x} + y\dot{y}}{\sqrt{x^{2} + y^{2}}}.
+	\rho = \sqrt{p_x^{2} + p_y^{2}},\ \varphi = \arctan( \frac{p_y}{p_x}),\ 	\dot{\rho} = \frac{p_x v_x + p_y v_y}{\sqrt{p_x^{2} + p_y^{2}}}.
 \end{equation}
 %
 The Jacobian matrix of \(\mathbf{h}\) is
@@ -200,9 +206,9 @@ The Jacobian matrix of \(\mathbf{h}\) is
 \begin{equation}
 	\renewcommand{\arraystretch}{1.5}
 	\mathbf{H} = \begin{bmatrix}
-	\frac{x}{\sqrt{x^{2} + y^{2}}} & \frac{y}{\sqrt{x^{2} + y^{2}}} & 0 & 0 \\
-	 - \frac{y}{x^{2} + y^{2}} & \frac{x}{x^{2} + y^{2}} & 0 & 0 \\
-	\frac{y( y\dot{x} - x\dot{y})}{( x^{2} + y^{2})^{\frac{3}{2}}} & \frac{x( x\dot{y} - y\dot{x})}{( x^{2} + y^{2})^{\frac{3}{2}}} & \frac{x}{\sqrt{x^{2} + y^{2}}} & \frac{y}{\sqrt{x^{2} + y^{2}}} \\
+	\frac{p_x}{\sqrt{p_x^{2} + p_y^{2}}} & \frac{p_y}{\sqrt{p_x^{2} + p_y^{2}}} & 0 & 0 \\
+	 - \frac{p_y}{p_x^{2} + p_y^{2}} & \frac{p_x}{p_x^{2} + p_y^{2}} & 0 & 0 \\
+	\frac{p_y( p_y v_x - p_x v_y)}{( p_x^{2} + p_y^{2})^{\frac{3}{2}}} & \frac{p_x( p_x v_y - p_y v_x)}{( p_x^{2} + p_y^{2})^{\frac{3}{2}}} & \frac{p_x}{\sqrt{p_x^{2} + p_y^{2}}} & \frac{p_y}{\sqrt{p_x^{2} + p_y^{2}}} \\
 	\end{bmatrix}.
 \end{equation}
 %
@@ -217,5 +223,55 @@ measurement noises are both static. Therefore, \(\mathbf{W}\) and
 
 \section{Uncented Kalman filter}\label{uncented-kalman-filter}
 
+The uncented Kalman filter (UKF) is a derivative-free alternative to the extended Kalman filter (EKF). The uncented transform is a method for calculating the statistics of a random variable which undergoes a nonlinear transformation. Considering propagating a 1D state vector \(\mathbf{x}\) through a nonlinear function \(\mathbf{y} = \mathbf{f}(\mathbf{x})\). To calculate the statistics of \(\mathbf{f}\), we form a matrix \(\boldsymbol{\chi}\) consisting of 2$L$+1 sigma vectors \cite{Wan}
+%
+\begin{align}
+	\chi_{0} &= \mathbf{\bar{x}} \\
+	\chi_{i} &= \mathbf{\bar{x}} + \sqrt{(\lambda + L)\mathbf{P_{x}}}, i=1,...,L \\
+	\chi_{i} &= \mathbf{\bar{x}} - \sqrt{(\lambda + L)\mathbf{P_{x}}}, i=L+1,...,2L
+\end{align}
+%
+where \(\lambda = \alpha^{2}(L + \kappa) - L\) is a scaling parameter. The constant $\alpha \in (0, 1]$ determines the spread of the sigma points around \(\mathbf{\bar{x}}\). Another constant $\kappa$ is usually set to either 0 or $3 - L$.
+
+\subsection{UKF in CTRV model}
+
+The CTRV (Constant Turn Rate and Velocity) model
+
+\begin{figure}[h]
+	\center
+	\includegraphics[scale=0.5]{./images_KalmanFilter/{CTRV model}.png}
+	\caption{Illustration of the CTRV model}
+	\label{fig:ctrv}
+\end{figure}
+%
+The state vector is given by
+\begin{equation}
+	\mathbf{x} = \begin{bmatrix}p_x \\ p_y \\ v \\ \psi \\ \dot{\psi}\end{bmatrix}. 
+\end{equation}
+%
+The time update function can be written as
+\begin{equation}
+	\mathbf{x}_{k} = \mathbf{x}_{k-1} + \int_{t_{k-1}}^{t_k} {\begin{bmatrix}\dot{p}_x \\ \dot{p}_y \\ \dot{v} \\ \dot{\psi} \\ \dot{\dot{\psi}}\end{bmatrix}dt} 
+	\approx \mathbf{x}_{k-1} + \begin{bmatrix}\dot{p}_x \\ \dot{p}_y \\ 0 \\ \dot{\psi}\Delta t \\ 0\end{bmatrix}
+\end{equation}
+
+
+%%%-------------------------------------------------------------------------%%%
+%%%-------------------------------------------------------------------------%%%
+%%%-------------------------------------------------------------------------%%%
+
+\begin{thebibliography}{9}
+
+\bibitem{Welch} 
+Greg Welch and Gary Bishop.
+\textit{An introduction to the Kalman filter}. 
+ACM, Inc. 2001.
+
+\bibitem{Wan} 
+Eric A. Wan and Rudolph van der Merwe, 
+\textit{The uncented Kalman filter}. 
+Kalman filtering and neural networks, John Wiley \& Sons, Inc., 2002.
+
+\end{thebibliography}
 
 \end{document}
