@@ -1,0 +1,221 @@
+\documentclass[12pt]{article}
+\usepackage{lmodern}
+\usepackage{amsmath, amsthm, amssymb, amsfonts}
+
+\usepackage{geometry}
+\geometry{
+	a4paper,
+	left=20mm,
+	right=20mm,
+	top=20mm,
+	bottom=20mm
+}
+
+% Define reference for color names
+\usepackage[svgnames]{xcolor}
+\definecolor{dodgerblue}{RGB}{30,144,255}
+
+% Set table caption
+\usepackage{caption}
+\captionsetup[table]{
+	skip=6pt
+}
+
+\usepackage[]{microtype}
+
+% Set reference
+\usepackage{hyperref}
+\hypersetup {
+	colorlinks=true,
+	linkcolor=dodgerblue
+}
+
+% For fixed width table cell with alignment
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+% First line ident
+\usepackage{indentfirst}
+\setlength{\parindent}{0.75cm}
+
+\begin{document}
+
+\title{Sensor Fusion with Kalman Filter}
+\author{Jun Zhu April 08, 2017}
+
+%%%-------------------------------------------------------------------------%%%
+%%%-------------------------------------------------------------------------%%%
+%%%-------------------------------------------------------------------------%%%
+
+\section{Basic Kalman Filter}\label{basic-kalman-filter}
+
+The Kalman filter estimates a process by using a feedback control. The filter predicts the system state at some time and then obtains feedback based on measurement. The time update (prediction) function of the basic Kalman filter is governed by the linear stochastic equation
+%
+\begin{equation}
+	\mathbf{x}_{k} = \mathbf{F}\mathbf{x}_{k - 1} + \mathbf{w},
+\end{equation}
+%
+where \(\mathbf{x}_{k} \in \mathfrak{R}^{n}\) is the state vector and \(\mathbf{w}\sim N( 0,\mathbf{Q})\) is the process noise with \(\mathbf{Q}\) the covariance matrix. The measurement function is written as:
+%
+\begin{equation}
+	\mathbf{z}_{\mathbf{k}} = \mathbf{H}\mathbf{x}_{k} + \mathbf{\nu},
+\end{equation}
+%
+where \(\mathbf{z}_{k} \in \mathfrak{R}^{m}\) is the measurement vector and \(\mathbf{\nu}\sim N( 0,\mathbf{R})\) is the process noise with \(\mathbf{R}\) the covariance matrix.
+
+The equations used in the Kalman filter are listed in Table~\ref{tab:table-KF}. Here \(\mathbf{P}_{k}^{-}\) and \(\mathbf{P}_{k}\) are the priori and posteriori error covariance matrix, respectively, \(\mathbf{z}_{k} - \mathbf{H}\mathbf{x}_{k}^{-}\) is called the measurement innovation, and \(\mathbf{K}_{k}\) is chosen to minimize the posteriori error covariance.
+
+\begin{table}[h]
+	\renewcommand{\arraystretch}{1.5}
+	\caption{Discrete Kalman filter time and measurement update equations.}
+	\centering
+	\label{tab:table-KF}
+	\begin{tabular}{C{7cm}|C{7cm}}
+		\hline
+		Time update (predict) & Measurement update (correct) \\
+		\hline
+		$\begin{aligned}[t]
+			\mathbf{x}_{k}^{-} &= \mathbf{F}\mathbf{x}_{k - 1} \\
+			\mathbf{P}_{k}^{-} &= \mathbf{F}\mathbf{P}_{k - 1}\mathbf{F}^{\mathbf{T}} + \mathbf{Q}
+		\end{aligned}$ &
+		$\begin{aligned}[t]
+			\mathbf{K}_{k} &= \mathbf{P}_{k}^{-}\mathbf{H}^{\mathbf{T}}( \mathbf{H}\mathbf{P}_{k}^{-}\mathbf{H}^{\mathbf{T}}\mathbf{+ R})^{- 1} \\
+			\mathbf{x}_{k} &= \mathbf{x}_{k}^{-} + \mathbf{K}_{k}( \mathbf{z}_{k} - \mathbf{H}\mathbf{x}_{k}^{-}) \\
+			\mathbf{P}_{k} &= ( \mathbf{I} - \mathbf{K}_{k}\mathbf{H})\mathbf{P}_{k}^{-}
+		\end{aligned}$ \\
+		\hline
+	\end{tabular}
+\end{table}
+
+In the LIDAR measurement, the state vector \(\mathbf{x}_{k}\) is given by
+%
+\begin{equation}
+	\mathbf{x}_{k} = \begin{bmatrix}x & y & \dot{x} & \dot{y}\end{bmatrix}^{T}.
+\end{equation}
+%
+Assuming a linear motion, we have
+%
+\begin{equation}
+	\mathbf{F} = \begin{bmatrix}
+	1 & 0 & \Delta t & 0 \\
+	0 & 1 & 0 & \Delta t \\
+	0 & 0 & 1 & 0 \\
+	0 & 0 & 0 & 1 \\
+	\end{bmatrix},
+\end{equation}
+%
+where \(\Delta t\) is the time step. The measurement vector is \(\mathbf{z}_{k} = \begin{bmatrix} x & y \end{bmatrix}^{T}\), and the measurement matrix is simply
+%
+\begin{equation}
+	\mathbf{H} = \begin{bmatrix}
+	1 & 0 & 0 & 0 \\
+	0 & 1 & 0 & 0 \\
+	\end{bmatrix}.
+\end{equation}
+
+%%%-------------------------------------------------------------------------%%%
+%%%-------------------------------------------------------------------------%%%
+%%%-------------------------------------------------------------------------%%%
+
+\section{Extended Kalman filter}\label{extended-kalman-filter}
+
+The extended Kalman filter is used to solve the problem in which the state function
+%
+\begin{equation}
+	\mathbf{x}_{k} = \mathbf{f}( \mathbf{x}_{k - 1},\ \mathbf{w}_{k - 1})
+\end{equation}
+and/or the measurement function
+%
+\begin{equation}
+	\mathbf{z}_{k} = \mathbf{h}( \mathbf{x}_{k},\mathbf{\nu}_{k}).
+\end{equation}
+%
+are nonlinear.
+
+The equations used in the extended Kalman filter are summarized in Table 2. Here, \(\mathbf{F}\) is the Jacobian matrix of partial derivatives of \(\mathbf{f}\) with respect to \(\mathbf{x}\), which gives
+%
+\begin{equation}
+	F_{i,j} = \frac{\partial f_{i}}{\partial x_{j}}.
+\end{equation}
+%
+\(\mathbf{W}\) is the Jacobian matrix of partial derivatives of \(\mathbf{f}\) with respect to \(\mathbf{w}\), which gives
+%
+\begin{equation}
+	W_{i,j} = \frac{\partial f_{i}}{\partial w_{j}}.
+\end{equation}
+%
+\(\mathbf{H}\) is the Jacobian matrix of partial derivatives of \(\mathbf{h}\) with respect to \(\mathbf{x}\), that is
+%
+\begin{equation}
+	H_{i,j} = \frac{\partial h_{i}}{\partial x_{j}}.
+\end{equation}
+%
+\(\mathbf{V}\) is the Jacobian matrix of partial derivatives of \(\mathbf{h}\) with respect to \(\mathbf{v}\), that is
+%
+\begin{equation}
+	V_{i,j} = \frac{\partial h_{i}}{\partial v_{j}}.
+\end{equation}
+%
+It must be noted that in the extended Kalman filter the noise is no
+longer normal after the nonlinear transformation.
+
+\begin{table}[h]
+	\renewcommand{\arraystretch}{1.5}
+	\caption{Extended Kalman filter time and measurement update equations.}
+	\centering
+	\label{tab:table-EKF}
+	\begin{tabular}{C{7cm}|C{7cm}}
+		\hline
+		Time update (predict) & Measurement update (correct) \\
+		\hline
+		$\begin{aligned}[t]
+			\mathbf{x}_{k}^{-} &= \mathbf{f}( \mathbf{x}_{k - 1},0) \\
+			\mathbf{P}_{k}^{-} &= \mathbf{F}\mathbf{P}_{k - 1}\mathbf{F}^{\mathbf{T}}\mathbf{+}\mathbf{W}_{\mathbf{k}}\mathbf{Q}_{k - 1}\mathbf{W}_{k}^{T}
+		\end{aligned}$ &
+		$\begin{aligned}[t]
+			\mathbf{K}_{k} &= \mathbf{P}_{k}^{-}\mathbf{H}^{\mathbf{T}}( \mathbf{H}\mathbf{P}_{k}^{-}\mathbf{H}^{\mathbf{T}}\mathbf{+}\mathbf{V}_{k}\mathbf{R}_{k}\mathbf{V}_{k}^{T})^{- 1} \\
+			\mathbf{x}_{k} &= \mathbf{x}_{k}^{-} + \mathbf{K}_{k}( \mathbf{z}_{k} - \mathbf{h}(\mathbf{x}_{k}^{-},0)) \\
+			\mathbf{P}_{k} &= ( \mathbf{I} - \mathbf{K}_{k}\mathbf{H})\mathbf{P}_{k}^{-}
+		\end{aligned}$ \\
+		\hline
+	\end{tabular}
+\end{table}
+
+The RADAR measurement returns
+%
+\begin{equation}
+	{\mathbf{z}_{\mathbf{k}} = \begin{bmatrix} \rho_{k} & \varphi_{k} & 	{\dot{\rho}}_{k} \end{bmatrix}}^{T}
+\end{equation}
+%
+in the polar coordination system, which means the mapping from the state vector \(\mathbf{x}_{\mathbf{k}}\) to the measurement vector \(\mathbf{z}_{\mathbf{k}}\) is no longer linear. The transform equations from the Cartesian coordinate system to the polar coordinate system (\(\mathbf{h}\)) are given by
+%
+\begin{equation}
+	\rho = \sqrt{x^{2} + y^{2}},\ \varphi = \arctan( \frac{y}{x}),\ 	\dot{\rho} = \frac{x\dot{x} + y\dot{y}}{\sqrt{x^{2} + y^{2}}}.
+\end{equation}
+%
+The Jacobian matrix of \(\mathbf{h}\) is
+%
+\begin{equation}
+	\renewcommand{\arraystretch}{1.5}
+	\mathbf{H} = \begin{bmatrix}
+	\frac{x}{\sqrt{x^{2} + y^{2}}} & \frac{y}{\sqrt{x^{2} + y^{2}}} & 0 & 0 \\
+	 - \frac{y}{x^{2} + y^{2}} & \frac{x}{x^{2} + y^{2}} & 0 & 0 \\
+	\frac{y( y\dot{x} - x\dot{y})}{( x^{2} + y^{2})^{\frac{3}{2}}} & \frac{x( x\dot{y} - y\dot{x})}{( x^{2} + y^{2})^{\frac{3}{2}}} & \frac{x}{\sqrt{x^{2} + y^{2}}} & \frac{y}{\sqrt{x^{2} + y^{2}}} \\
+	\end{bmatrix}.
+\end{equation}
+%
+Since the linear motion assumption still holds, \(\mathbf{F}\) is 
+given by equation (4). Furthermore, we assume that the process and
+measurement noises are both static. Therefore, \(\mathbf{W}\) and
+\(\mathbf{V}\) are both identity matrices\textbf{.}
+
+%%%-------------------------------------------------------------------------%%%
+%%%-------------------------------------------------------------------------%%%
+%%%-------------------------------------------------------------------------%%%
+
+\section{Uncented Kalman filter}\label{uncented-kalman-filter}
+
+
+\end{document}
