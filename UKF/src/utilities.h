@@ -32,7 +32,6 @@ public:
   //
   Eigen::VectorXd Polar2Cartesian(const Eigen::VectorXd &x);
 
-
   //
   // Normalize an angle to (-pi, pi]
   //
