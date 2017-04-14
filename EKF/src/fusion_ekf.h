@@ -5,7 +5,7 @@
 #include <string>
 #include <fstream>
 #include "measurement_package.h"
-#include "Eigen/Dense"
+#include "../../Eigen/Dense"
 #include "kalman_filter.h"
 #include "utilities.h"
 
@@ -44,8 +44,8 @@ private:
   long long time_us_;
 
   // Acceleration noise components
-  float noise_ax_;
-  float noise_ay_;
+  double noise_ax_;
+  double noise_ay_;
 
 };
 

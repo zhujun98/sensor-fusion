@@ -2,7 +2,8 @@
 #define UTILITIES_H_
 
 #include <vector>
-#include "Eigen/Dense"
+#include "../../Eigen/Dense"
+
 
 class Utilities {
 public:
@@ -35,6 +36,11 @@ public:
   // Calculate Jacobian.
   //
   Eigen::MatrixXd CalculateJacobian(const Eigen::VectorXd &x);
+
+  //
+  // Normalize the angle to (-pi, pi]
+  //
+  double normalize_angle(double phi);
 
 };
 

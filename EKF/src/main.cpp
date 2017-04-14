@@ -2,13 +2,10 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include "Eigen/Dense"
+#include "../../Eigen/Dense"
 #include "fusion_ekf.h"
 #include "ground_truth_package.h"
 #include "measurement_package.h"
-
-
-const float PI = std::atan(1.0)*4;
 
 
 void check_arguments(int argc, char* argv[]) {
@@ -48,20 +45,6 @@ void check_files(std::ifstream& in_file, std::string& in_name,
   }
 }
 
-
-// Normalize the angle to (-pi, pi]
-float normalize_angle(float& phi) {
-  while (1) {
-    if (phi > PI) {
-      phi -= 2*PI;
-    }else if (phi <= -1.0*PI) {
-      phi += 2*PI;
-    }else{
-      break;
-    }
-  }
-}
-
 int main(int argc, char* argv[]) {
 
   check_arguments(argc, argv);
@@ -81,6 +64,7 @@ int main(int argc, char* argv[]) {
 
   // prep the measurement packages (each line represents a measurement at a
   // timestamp)
+  Utilities utilities;
   while (std::getline(in_file_, line)) {
 
     std::string sensor_type;
@@ -96,8 +80,8 @@ int main(int argc, char* argv[]) {
       // LIDAR MEASUREMENT
       meas_package.sensor_type_ = MeasurementPackage::LIDAR;
 
-      float x;
-      float y;
+      double x;
+      double y;
       iss >> x;
       iss >> y;
       meas_package.raw_measurements_ = Eigen::VectorXd(2);
@@ -106,17 +90,21 @@ int main(int argc, char* argv[]) {
       // RADAR MEASUREMENT
       meas_package.sensor_type_ = MeasurementPackage::RADAR;
 
-      float rho;
-      float phi;
-      float v_rho;
+      double rho;
+      double phi;
+      double v_rho;
       iss >> rho;
       iss >> phi;
       iss >> v_rho;
 
       // Normalize the angle to (-pi, pi]
-      normalize_angle(phi);
+      phi = utilities.normalize_angle(phi);
       meas_package.raw_measurements_ = Eigen::VectorXd(3);
       meas_package.raw_measurements_ << rho, phi, v_rho;
+    } else {
+      std::cerr << "Unknown sensor type: " << meas_package.sensor_type_
+                << std::endl;
+      exit(EXIT_FAILURE);
     }
 
     // read timestamp for both LIDAR and RADAR
@@ -125,10 +113,10 @@ int main(int argc, char* argv[]) {
     measurement_pack_list.push_back(meas_package);
 
     // read ground truth data to compare later
-    float x_gt;
-    float y_gt;
-    float vx_gt;
-    float vy_gt;
+    double x_gt;
+    double y_gt;
+    double vx_gt;
+    double vy_gt;
     iss >> x_gt;
     iss >> y_gt;
     iss >> vx_gt;
@@ -167,8 +155,8 @@ int main(int argc, char* argv[]) {
     } else if (measurement_pack_list[k].sensor_type_
                == MeasurementPackage::RADAR) {
       // output the estimation in the cartesian coordinates
-      float rho = measurement_pack_list[k].raw_measurements_(0);
-      float phi = measurement_pack_list[k].raw_measurements_(1);
+      double rho = measurement_pack_list[k].raw_measurements_(0);
+      double phi = measurement_pack_list[k].raw_measurements_(1);
       out_file_ << rho * std::cos(phi) << "\t"; // p1_meas
       out_file_ << rho * std::sin(phi) << "\t"; // ps_meas
     }
@@ -184,7 +172,6 @@ int main(int argc, char* argv[]) {
   }
 
   // compute the accuracy (RMSE)
-  Utilities utilities;
   std::cout << "Estimation accuracy - RMSE:" << std::endl
             << utilities.CalculateRMSE(estimations, ground_truth) << std::endl;
 

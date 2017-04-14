@@ -1,7 +1,7 @@
 #include <iostream>
 #include "fusion_ekf.h"
 #include "utilities.h"
-#include "Eigen/Dense"
+#include "../../Eigen/Dense"
 
 
 FusionEKF::FusionEKF() {
@@ -39,8 +39,8 @@ FusionEKF::FusionEKF() {
               0, 0, 0.09;
 
   //set the acceleration noise components
-  noise_ax_ = 9;
-  noise_ay_ = 9;
+  noise_ax_ = 9.0;
+  noise_ay_ = 9.0;
 
 }
 

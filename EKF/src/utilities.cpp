@@ -1,5 +1,9 @@
 #include <iostream>
 #include "utilities.h"
+#include "../../Eigen/Dense"
+
+
+const double kPI = std::atan(1.0)*4;
 
 
 Utilities::Utilities() {}
@@ -77,4 +81,11 @@ Eigen::MatrixXd Utilities::CalculateJacobian(const Eigen::VectorXd &x) {
       py*(py*x[2] - px*x[3])/c3, px*(px*x[3] - py*x[2])/c3, px/c2, py/c2;
 
   return h_j;
+}
+
+double Utilities::normalize_angle(double phi) {
+  while (phi <= -1.0*kPI) { phi += 2.0*kPI; }
+  while (phi > kPI) { phi -= 2.0*kPI; }
+
+  return phi;
 }
