@@ -135,7 +135,7 @@ The extended Kalman filter is used to solve the problem in which the state funct
 and/or the measurement function
 %
 \begin{equation}
-	\mathbf{z}_{k} = \mathbf{h}( \mathbf{x}_{k},\mathbf{\nu}_{k}).
+	\mathbf{z}_{k} = \mathbf{h}( \mathbf{x}_{k},\boldsymbol{\nu}_{k}).
 \end{equation}
 %
 are nonlinear.
@@ -158,10 +158,10 @@ The equations used in the extended Kalman filter are summarized in Table 2 \cite
 	H_{i,j} = \frac{\partial h_{i}}{\partial x_{j}}.
 \end{equation}
 %
-\(\mathbf{V}\) is the Jacobian matrix of partial derivatives of \(\mathbf{h}\) with respect to \(\mathbf{v}\), that is
+\(\mathbf{V}\) is the Jacobian matrix of partial derivatives of \(\mathbf{h}\) with respect to \(\boldsymbol{\nu}\), that is
 %
 \begin{equation}
-	V_{i,j} = \frac{\partial h_{i}}{\partial v_{j}}.
+	V_{i,j} = \frac{\partial h_{i}}{\partial \nu_{j}}.
 \end{equation}
 %
 It must be noted that in the extended Kalman filter the noise is no
@@ -223,15 +223,40 @@ measurement noises are both static. Therefore, \(\mathbf{W}\) and
 
 \section{Uncented Kalman filter}\label{uncented-kalman-filter}
 
-The uncented Kalman filter (UKF) is a derivative-free alternative to the extended Kalman filter (EKF). The uncented transform is a method for calculating the statistics of a random variable which undergoes a nonlinear transformation. Considering propagating a 1D state vector \(\mathbf{x}\) through a nonlinear function \(\mathbf{y} = \mathbf{f}(\mathbf{x})\). To calculate the statistics of \(\mathbf{f}\), we form a matrix \(\boldsymbol{\chi}\) consisting of 2$L$+1 sigma vectors \cite{Wan}
+The uncented Kalman filter (UKF) is a derivative-free alternative to the extended Kalman filter (EKF). The uncented transform is a method for calculating the statistics of a random variable which undergoes a nonlinear transformation. Considering propagating a 1D state vector \(\mathbf{x}\) through a nonlinear function \(\mathbf{y} = \mathbf{f}(\mathbf{x})\). To calculate the statistics of \(\mathbf{f}\), we form a matrix \(\mathbf{X}\) consisting of 2$L$+1 sigma vectors \cite{Wan}
 %
 \begin{align}
-	\chi_{0} &= \mathbf{\bar{x}} \\
-	\chi_{i} &= \mathbf{\bar{x}} + \sqrt{(\lambda + L)\mathbf{P_{x}}}, i=1,...,L \\
-	\chi_{i} &= \mathbf{\bar{x}} - \sqrt{(\lambda + L)\mathbf{P_{x}}}, i=L+1,...,2L
+	\mathbf{X_0} &= \mathbf{\bar{x}} \\
+	\mathbf{X_i} &= \mathbf{\bar{x}} + \sqrt{(\lambda + L)\mathbf{P_{x}}}, i=1,...,L \\
+	\mathbf{X_i} &= \mathbf{\bar{x}} - \sqrt{(\lambda + L)\mathbf{P_{x}}}, i=L+1,...,2L
 \end{align}
 %
 where \(\lambda = \alpha^{2}(L + \kappa) - L\) is a scaling parameter. The constant $\alpha \in (0, 1]$ determines the spread of the sigma points around \(\mathbf{\bar{x}}\). Another constant $\kappa$ is usually set to either 0 or $3 - L$.
+
+These sigma vectors are propagated through the same nonlinear function
+%
+\begin{equation}
+	\mathbf{\Gamma_i} = \mathbf{f}(\mathbf{X_i}), i = 0,...,2L
+\end{equation}
+%
+The mean and covariance of \(\mathbf{\Gamma}\) are given by
+%
+\begin{equation}
+	\mathbf{\bar{\Gamma}} = \sum_{i=0}^{2L} W^{(m)}_i \mathbf{\Gamma_i},
+\end{equation}
+%
+where the weights $W_i$ is given by
+%
+\begin{equation}
+	\begin{cases}
+		W^{(m)}_i &= \lambda / (L + \lambda) \\
+		W^{(c)}_i &= \lambda / (L + \lambda) + 1 - \alpha^2 + \beta \\
+		W_i^{(m)} &= W_i^{(c)} = 0.5/(L + \lambda), i=1,...,2L
+	\end{cases}
+	,
+\end{equation}
+%
+where $\beta$ is related to the distribution of \(\mathbf{x}\) and $\beta=2$ for Gaussian distribution.
 
 \subsection{UKF in CTRV model}
 
