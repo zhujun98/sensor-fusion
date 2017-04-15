@@ -63,10 +63,11 @@ UKF::UKF() {
   // Note that the column is augmented but the row is not.
   Xsig_pred_ = Eigen::MatrixXd(n_x_, 2*n_aug_+1);
 
-  lambda_ = 3 - n_x_;
+  // Scaling parameter for unscented transformation.
+  lambda_ = 3 - n_aug_;
 
   // Set weights
-  weights_ = Eigen::VectorXd(2*n_aug_+1);
+  weights_ = Eigen::VectorXd(2*n_aug_ + 1);
   weights_(0) = lambda_/(lambda_ + n_aug_);
   for (int i=1; i<2*n_aug_ + 1; ++i) {
     weights_(i) = 0.5/(lambda_ + n_aug_);
@@ -167,9 +168,9 @@ void UKF::Prediction(double delta_t) {
     double p_x_p, p_y_p;
 
     //Use different formulas for yawd != 0 and yawd == 0
-    if (fabs(yawd) > 0.001) {
-      p_x_p = p_x + v/yawd*(sin(yaw + yawd*delta_t) - sin(yaw));
-      p_y_p = p_y + v/yawd*(cos(yaw) - cos(yaw + yawd*delta_t));
+    if (std::abs(yawd) > 0.001) {
+      p_x_p = p_x + v/yawd*(std::sin(yaw + yawd*delta_t) - std::sin(yaw));
+      p_y_p = p_y + v/yawd*(std::cos(yaw) - std::cos(yaw + yawd*delta_t));
     }
     else {
       p_x_p = p_x + v*delta_t*cos(yaw);
@@ -182,8 +183,8 @@ void UKF::Prediction(double delta_t) {
 
     //Add noise
     double delta_t2 = delta_t*delta_t;
-    p_x_p += 0.5*nu_a*delta_t2*cos(yaw);
-    p_y_p += 0.5*nu_a*delta_t2*sin(yaw);
+    p_x_p += 0.5*nu_a*delta_t2*std::cos(yaw);
+    p_y_p += 0.5*nu_a*delta_t2*std::sin(yaw);
     v_p += nu_a*delta_t;
     yaw_p += 0.5*nu_yawdd*delta_t2;
     yawd_p += nu_yawdd*delta_t;
@@ -210,11 +211,13 @@ void UKF::Prediction(double delta_t) {
   for (int i=0; i<2*n_aug_+1; ++i) {
     Eigen::VectorXd x_diff = Xsig_pred_.col(i) - x_;
 
-    Utilities utilities;
-    x_diff(3) = utilities.normalize_angle(x_diff(3));
+    //Utilities utilities;
+    //x_diff(3) = utilities.normalize_angle(x_diff(3));
 
     P_ += weights_(i)*x_diff*x_diff.transpose();
   }
+
+  std::cout << x_ << std::endl;
 }
 
 void UKF::UpdateLidar(const MeasurementPackage &ms_pack, double delta_t) {
@@ -235,7 +238,6 @@ void UKF::UpdateLidar(const MeasurementPackage &ms_pack, double delta_t) {
   MeasurementUpdate(ms_pack, Zsig, n_z);
 }
 
-
 void UKF::UpdateRadar(const MeasurementPackage &ms_pack, double delta_t) {
 
   Prediction(delta_t);
@@ -243,18 +245,21 @@ void UKF::UpdateRadar(const MeasurementPackage &ms_pack, double delta_t) {
   Utilities utilities;
 
   int n_z = 3;
-  Eigen::MatrixXd Zsig = Eigen::MatrixXd(n_z, 2 * n_aug_ + 1);
+  Eigen::MatrixXd Zsig = Eigen::MatrixXd(n_z, 2*n_aug_+1);
 
   //transform sigma points into measurement space
-  for (int i = 0; i < 2 * n_aug_ + 1; ++i) {
+  for (int i = 0; i < 2*n_aug_+1; ++i) {
     double p_x = Xsig_pred_(0, i);
     double p_y = Xsig_pred_(1, i);
     double v = Xsig_pred_(2, i);
     double yaw = Xsig_pred_(3, i);
 
-    Zsig(0, i) = sqrt(p_x * p_x + p_y * p_y);
+    double rho = sqrt(p_x * p_x + p_y * p_y);
+    if (std::abs(rho) < 1e-6) { rho = 1e-6; }
+    Zsig(0, i) = rho;
     Zsig(1, i) = atan2(p_y, p_x);
-    Zsig(2, i) = (p_x * cos(yaw) * v + p_y * sin(yaw) * v) / Zsig(0, i);
+    // Avoid division by zero
+    Zsig(2, i) = (p_x * cos(yaw) * v + p_y * sin(yaw) * v) / rho;
   }
 
   MeasurementUpdate(ms_pack, Zsig, n_z);
@@ -269,24 +274,25 @@ void UKF::MeasurementUpdate(
 
   //calculate mean predicted measurement
   z_pred.fill(0.0);
-  for (int i=0; i< 2*n_aug_ + 1; ++i) {
+  for (int i=0; i< 2*n_aug_+1; ++i) {
     z_pred += weights_(i)*Zsig.col(i);
   }
 
   //calculate measurement covariance matrix S
   Eigen::MatrixXd S = Eigen::MatrixXd(n_z, n_z);
+
   S.fill(0.0);
-  for (int i=0; i< 2*n_aug_ + 1; ++i) {
-    Eigen::VectorXd diff = Zsig.col(i) - z_pred;
-    if (ms_pack.sensor_type_ == MeasurementPackage::RADAR) {
-      diff(1) = utilities.normalize_angle(diff(1));
-    }
-    S += weights_(i)*diff*diff.transpose();
+  for (int i=0; i< 2*n_aug_+1; ++i) {
+    Eigen::VectorXd z_diff = Zsig.col(i) - z_pred;
+    //if (ms_pack.sensor_type_ == MeasurementPackage::RADAR) {
+    //  z_diff(1) = utilities.normalize_angle(z_diff(1));
+    //}
+    S += weights_(i)*z_diff*z_diff.transpose();
   }
 
   if (ms_pack.sensor_type_ == MeasurementPackage::RADAR) {
     S += r_radar_;
-  } else {
+  } else if (ms_pack.sensor_type_ == MeasurementPackage::LIDAR){
     S += r_lidar_;
   }
 
@@ -297,34 +303,43 @@ void UKF::MeasurementUpdate(
   for (int i=0; i<2*n_aug_+1; i++) {
     //residual
     Eigen::VectorXd z_diff = Zsig.col(i) - z_pred;
-    if (ms_pack.sensor_type_ == MeasurementPackage::RADAR) {
-      z_diff(1) = utilities.normalize_angle(z_diff(1));
-    }
+    //if (ms_pack.sensor_type_ == MeasurementPackage::RADAR) {
+    //  z_diff(1) = utilities.normalize_angle(z_diff(1));
+    //}
 
     // state difference
     Eigen::VectorXd x_diff = Xsig_pred_.col(i) - x_;
-    x_diff(3) = utilities.normalize_angle(x_diff(3));
+    //x_diff(3) = utilities.normalize_angle(x_diff(3));
 
     Tc += weights_(i)*x_diff*z_diff.transpose();
   }
 
   //Kalman gain K;
-  Eigen::MatrixXd K = Tc * S.inverse();
+  Eigen::MatrixXd Si = S.inverse();
+  Eigen::MatrixXd K = Tc*Si;
 
   //residual
   Eigen::VectorXd z_diff = ms_pack.raw_measurements_ - z_pred;
-  if (ms_pack.sensor_type_ == MeasurementPackage::RADAR) {
-    z_diff(1) = utilities.normalize_angle(z_diff(1));
-  }
+  //if (ms_pack.sensor_type_ == MeasurementPackage::RADAR) {
+  //  z_diff(1) = utilities.normalize_angle(z_diff(1));
+  //}
   //update state mean and covariance matrix
   x_ += K*z_diff;
   P_ -= K*S*K.transpose();
+
+  // Calculate the normalized innovation squared()
+  if (ms_pack.sensor_type_ == MeasurementPackage::RADAR) {
+    NIS_radar_ = z_diff.transpose()*Si*z_diff;
+  } else if (ms_pack.sensor_type_ == MeasurementPackage::LIDAR){
+    NIS_lidar_ = z_diff.transpose()*Si*z_diff;
+  }
+
 }
 
 Eigen::MatrixXd UKF::GenerateSigmaPoints(
     const Eigen::VectorXd &x, const Eigen::MatrixXd &P, int n_aug, double lambda) {
 
-  int n = x.size();
+  long n = x.size();
 
   Eigen::MatrixXd A = P.llt().matrixL();
   Eigen::MatrixXd Xsig = Eigen::MatrixXd(n, 2*n_aug+1);
