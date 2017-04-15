@@ -2,7 +2,6 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include <stdlib.h>
 #include "../../Eigen/Dense"
 #include "ukf.h"
 #include "ground_truth_package.h"
@@ -59,10 +58,9 @@ int main(int argc, char* argv[]) {
 
   check_files(in_file_, in_file_name_, out_file_, out_file_name_);
 
-  /**********************************************
-   *  Set Measurements                          *
-   **********************************************/
-
+  //
+  // Set Measurements
+  //
   std::vector<MeasurementPackage> measurement_pack_list;
   std::vector<GroundTruthPackage> gt_pack_list;
 
@@ -171,17 +169,14 @@ int main(int argc, char* argv[]) {
     if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::LIDAR) {
       // output the estimation
 
-      // p1 - meas
       out_file_ << measurement_pack_list[k].raw_measurements_(0) << "\t";
-
-      // p2 - meas
       out_file_ << measurement_pack_list[k].raw_measurements_(1) << "\t";
     } else if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::RADAR) {
       // output the estimation in the cartesian coordinates
       double ro = measurement_pack_list[k].raw_measurements_(0);
       double phi = measurement_pack_list[k].raw_measurements_(1);
-      out_file_ << ro * cos(phi) << "\t"; // p1_meas
-      out_file_ << ro * sin(phi) << "\t"; // p2_meas
+      out_file_ << ro * cos(phi) << "\t";
+      out_file_ << ro * sin(phi) << "\t";
     }
 
     // output the ground truth packages
@@ -198,14 +193,13 @@ int main(int argc, char* argv[]) {
       out_file_ << ukf.NIS_radar_ << "\n";
     }
 
-
     // convert ukf x vector to cartesian to compare to ground truth
     Eigen::VectorXd ukf_x_cartesian_ = Eigen::VectorXd(4);
 
     double x_estimate_ = ukf.x_(0);
     double y_estimate_ = ukf.x_(1);
-    double vx_estimate_ = ukf.x_(2) * cos(ukf.x_(3));
-    double vy_estimate_ = ukf.x_(2) * sin(ukf.x_(3));
+    double vx_estimate_ = ukf.x_(2) * std::cos(ukf.x_(3));
+    double vy_estimate_ = ukf.x_(2) * std::sin(ukf.x_(3));
     
     ukf_x_cartesian_ << x_estimate_, y_estimate_, vx_estimate_, vy_estimate_;
     

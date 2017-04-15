@@ -1,6 +1,5 @@
 #include <iostream>
 #include "utilities.h"
-#include "../../Eigen/Dense"
 
 
 const double kPI = std::atan(1.0)*4;

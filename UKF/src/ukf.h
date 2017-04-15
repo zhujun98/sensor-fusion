@@ -3,10 +3,6 @@
 
 #include "measurement_package.h"
 #include "../../Eigen/Dense"
-#include <vector>
-#include <string>
-#include <fstream>
-#include "utilities.h"
 
 
 class UKF {
@@ -73,7 +69,11 @@ private:
   double std_radphi_;
 
   // Radar measurement noise standard deviation radius change in m/s
-  double std_radrd_ ;
+  double std_radrd_;
+
+  // Measurement covariance matrices for LIDAR and RADAR
+  Eigen::MatrixXd r_lidar_;
+  Eigen::MatrixXd r_radar_;
 
   // Weights of sigma points
   Eigen::VectorXd weights_;
@@ -97,18 +97,25 @@ private:
   // Updates the state and the state covariance matrix using a lidar measurement
   // @param meas_package The measurement at k+1
   //
-  void UpdateLidar(const MeasurementPackage ms_pack, double delta_t);
+  void UpdateLidar(const MeasurementPackage &ms_pack, double delta_t);
 
   //
   // Updates the state and the state covariance matrix using a radar measurement
   // @param meas_package The measurement at k+1
   //
-  void UpdateRadar(const MeasurementPackage ms_pack, double delta_t);
+  void UpdateRadar(const MeasurementPackage &ms_pack, double delta_t);
 
   //
   // Generate sigma points.
   //
-  void GenerateSigmaPoints();
+  Eigen::MatrixXd GenerateSigmaPoints(
+      const Eigen::VectorXd &x, const Eigen::MatrixXd &P, int n_aug, double lambda);
+
+  //
+  // Kalman filter measurement update
+  //
+  void MeasurementUpdate(
+      const MeasurementPackage &ms_pack, const Eigen::MatrixXd &Zsig, int n_z);
 
 };
 
