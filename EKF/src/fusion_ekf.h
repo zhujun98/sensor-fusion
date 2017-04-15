@@ -1,13 +1,9 @@
 #ifndef FusionEKF_H_
 #define FusionEKF_H_
 
-#include <vector>
-#include <string>
-#include <fstream>
 #include "measurement_package.h"
 #include "../../Eigen/Dense"
 #include "kalman_filter.h"
-#include "utilities.h"
 
 
 class FusionEKF {
@@ -28,8 +24,7 @@ public:
   void ProcessMeasurement(const MeasurementPackage &measurement_pack);
 
   //
-  // Measurement covariance matrices and measurement matrices for
-  // LIDAR and RADAR.
+  // Measurement covariance matrices for LIDAR and RADAR.
   //
   Eigen::MatrixXd r_lidar_;
   Eigen::MatrixXd r_radar_;

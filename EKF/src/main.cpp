@@ -6,6 +6,7 @@
 #include "fusion_ekf.h"
 #include "ground_truth_package.h"
 #include "measurement_package.h"
+#include "utilities.h"
 
 
 void check_arguments(int argc, char* argv[]) {

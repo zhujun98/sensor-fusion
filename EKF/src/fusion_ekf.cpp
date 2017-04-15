@@ -1,7 +1,6 @@
 #include <iostream>
 #include "fusion_ekf.h"
 #include "utilities.h"
-#include "../../Eigen/Dense"
 
 
 FusionEKF::FusionEKF() {
