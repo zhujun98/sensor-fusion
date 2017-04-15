@@ -29,21 +29,24 @@ public:
   virtual ~KalmanFilter();
 
   //
-  // A full cycle (prediction + measurement update)
-  // using standard Kalman Filter equations
+  // A full cycle (prediction + measurement update) using
+  // standard Kalman Filter equations
+  // @param: z: measurement
+  // @param: r: measurement covariance matrix
   //
   void KF(const Eigen::VectorXd &z, const Eigen::MatrixXd &r);
 
   //
-  // A full cycle (prediction + measurement update)
-  // using extended Kalman Filter equations
+  // A full cycle (prediction + measurement update) using
+  // extended Kalman Filter equations
+  // @param: z: measurement
+  // @param: r: measurement covariance matrix
   //
   void EKF(const Eigen::VectorXd &z, const Eigen::MatrixXd &r);
 
 private:
   //
-  // Prediction Predicts the state and the state covariance
-  // using the process model
+  // Predict the state and the state covariance using the process model
   //
   void Predict();
 };

@@ -86,7 +86,7 @@ Eigen::MatrixXd Utilities::CalculateJacobian(const Eigen::VectorXd &x) {
 }
 
 double Utilities::normalize_angle(double phi) {
-  if (phi <= -1.0*kPI || phi > kPI) {
+  if (phi < -1.0*kPI || phi > kPI) {
     double s = std::sin(phi);
     phi = std::asin(s);
   }

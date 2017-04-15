@@ -38,7 +38,7 @@ public:
   Eigen::MatrixXd CalculateJacobian(const Eigen::VectorXd &x);
 
   //
-  // Normalize the angle to (-pi, pi]
+  // Normalize the angle to [-pi, pi]
   //
   double normalize_angle(double phi);
 
