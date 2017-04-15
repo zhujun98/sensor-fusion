@@ -23,6 +23,12 @@ public:
   //
   void ProcessMeasurement(const MeasurementPackage &measurement_pack);
 
+  // if this is false, lidar measurements will be ignored (except for init)
+  bool use_lidar_;
+
+  // if this is false, radar measurements will be ignored (except for init)
+  bool use_radar_;
+
   //
   // Measurement covariance matrices for LIDAR and RADAR.
   //

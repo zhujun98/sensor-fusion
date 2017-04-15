@@ -8,6 +8,9 @@ FusionEKF::FusionEKF() {
   is_initialized_ = false;
   time_us_ = 0;
 
+  use_radar_ = true;
+  use_lidar_ = true;
+
   //state covariance matrix
   ekf_.p_ = Eigen::MatrixXd(4, 4);
   ekf_.p_ << 1, 0, 0, 0,
@@ -61,9 +64,13 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       // Convert positions and velocities from polar to cartesian coordinates.
       Utilities utilities;
       ekf_.x_ = utilities.Polar2Cartesian(x_polar);
-    } else {
+    } else if (measurement_pack.sensor_type_ == MeasurementPackage::LIDAR) {
       ekf_.x_ << measurement_pack.raw_measurements_[0],
           measurement_pack.raw_measurements_[1], 0, 0;
+    } else {
+      std::cerr << "Unknown sensor_type_: " << measurement_pack.sensor_type_
+                << std::endl;
+      exit(EXIT_FAILURE);
     }
 
     time_us_ = measurement_pack.timestamp_;
@@ -92,10 +99,14 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
             0, dt_3/2*noise_ay_, 0, dt_2*noise_ay_;
 
   // Prediction and Measurement updating
-  if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
+  if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR
+      && use_radar_) {
     ekf_.EKF(measurement_pack.raw_measurements_, r_radar_);
-  } else {
+  } else if (measurement_pack.sensor_type_ == MeasurementPackage::LIDAR
+             && use_lidar_) {
     ekf_.KF(measurement_pack.raw_measurements_, r_lidar_);
+  } else {
+    return;
   }
 
   // Update time stamp
