@@ -41,6 +41,8 @@ Eigen::VectorXd Utilities::Cartesian2Polar(const Eigen::VectorXd &x) {
   double rho = std::sqrt(px*px + py*py);
   double phi = std::atan2(py, px);
 
+  if (rho < 1e-6 ) { rho = 1e-6; }
+
   double v_rho = (px*x[2] + py*x[3])/rho;
 
   x_polar << rho, phi, v_rho;
@@ -70,6 +72,7 @@ Eigen::MatrixXd Utilities::CalculateJacobian(const Eigen::VectorXd &x) {
   double py = x[1];
 
   double c1 = px*px + py*py;
+  if (c1 < 1e-12 ) { c1 = 1e-12; }
   double c2 = std::sqrt(c1);
   double c3 = c1*c2;
 

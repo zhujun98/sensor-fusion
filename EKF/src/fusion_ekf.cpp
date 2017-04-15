@@ -12,8 +12,8 @@ FusionEKF::FusionEKF() {
   ekf_.p_ = Eigen::MatrixXd(4, 4);
   ekf_.p_ << 1, 0, 0, 0,
             0, 1, 0, 0,
-            0, 0, 1000, 0,
-            0, 0, 0, 1000;
+            0, 0, 1, 0,
+            0, 0, 0, 1;
 
   //the initial transition matrix F_
   ekf_.f_ = Eigen::MatrixXd(4, 4);
@@ -93,19 +93,12 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   // Prediction and Measurement updating
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
-    // Skip updating when near the origin.
-    double rho = ekf_.x_[0]*ekf_.x_[0] + ekf_.x_[1]*ekf_.x_[1];
-    if (rho > 1e-12) {
-      ekf_.EKF(measurement_pack.raw_measurements_, r_radar_);
-    } else {
-      return;
-    }
+    ekf_.EKF(measurement_pack.raw_measurements_, r_radar_);
   } else {
     ekf_.KF(measurement_pack.raw_measurements_, r_lidar_);
   }
 
-  // The latest time update should be put here since the update may
-  // be skipped, e.g. for the RADAR measurement.
+  // Update time stamp
   time_us_ = measurement_pack.timestamp_;
 
 }
