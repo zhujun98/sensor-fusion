@@ -186,11 +186,10 @@ int main(int argc, char* argv[]) {
     out_file_ << gt_pack_list[k].gt_values_(3) << "\t";
 
     // output the NIS values
-    
     if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::LIDAR) {
-      out_file_ << ukf.NIS_lidar_ << "\n";
+      out_file_ << ukf.NIS_lidar_ << "\t" << "L" << "\n";
     } else if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::RADAR) {
-      out_file_ << ukf.NIS_radar_ << "\n";
+      out_file_ << ukf.NIS_radar_ << "\t" << "R" << "\n";
     }
 
     // convert ukf x vector to cartesian to compare to ground truth
