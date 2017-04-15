@@ -225,7 +225,7 @@ measurement noises are both static. Therefore, \(\mathbf{W}\) and
 
 The uncented Kalman filter (UKF) is a derivative-free alternative to the extended Kalman filter (EKF). The uncented transform is a method for calculating the statistics of a random variable which undergoes a nonlinear transformation. Considering propagating a 1D state vector \(\mathbf{x}\) through a nonlinear function \(\mathbf{y} = \mathbf{f}(\mathbf{x})\). To calculate the statistics of \(\mathbf{f}\), we form a matrix \(\mathbf{X}\) consisting of 2$L$+1 sigma vectors \cite{Wan}
 %
-\begin{align}
+\begin{align} \label{eq:UK_start}
 	\mathbf{X_0} &= \mathbf{\bar{x}} \\
 	\mathbf{X_i} &= \mathbf{\bar{x}} + \sqrt{(\lambda + L)\mathbf{P_{x}}}, i=1,...,L \\
 	\mathbf{X_i} &= \mathbf{\bar{x}} - \sqrt{(\lambda + L)\mathbf{P_{x}}}, i=L+1,...,2L
@@ -245,9 +245,14 @@ The mean and covariance of \(\mathbf{\Gamma}\) are given by
 	\mathbf{\bar{\Gamma}} = \sum_{i=0}^{2L} W^{(m)}_i \mathbf{\Gamma_i},
 \end{equation}
 %
+and
+\begin{equation}
+	\mathbf{P_\Gamma} = \sum_{i=0}^{2L} W^{(c)}_i (\mathbf{\Gamma_i} - \mathbf{\bar{\Gamma}}) (\mathbf{\Gamma_i} - \mathbf{\bar{\Gamma}})^T
+\end{equation}
+%
 where the weights $W_i$ is given by
 %
-\begin{equation}
+\begin{equation} \label{eq:UK_end}
 	\begin{cases}
 		W^{(m)}_i &= \lambda / (L + \lambda) \\
 		W^{(c)}_i &= \lambda / (L + \lambda) + 1 - \alpha^2 + \beta \\
@@ -258,6 +263,13 @@ where the weights $W_i$ is given by
 %
 where $\beta$ is related to the distribution of \(\mathbf{x}\) and $\beta=2$ for Gaussian distribution.
 
+In UKF, the state vector is expanded to
+%
+\begin{equation}
+	\mathbf{x}^a_k = [\mathbf{x}^T_k, \mathbf{w}^T_k, \boldsymbol{\nu}^T_k]^T. 
+\end{equation}
+%
+Equation \ref{eq:UK_start} - \ref{eq:UK_end} are applied to the augmented state vector to calculate the corresponding sigma matrix \(\mathbf{\Gamma}^a_k\).
 \subsection{UKF in CTRV model}
 
 The CTRV (Constant Turn Rate and Velocity) model
@@ -279,7 +291,7 @@ The time update function can be written as
 	\mathbf{x}_{k} = \mathbf{x}_{k-1} + \int_{t_{k-1}}^{t_k} {\begin{bmatrix}\dot{p}_x \\ \dot{p}_y \\ \dot{v} \\ \dot{\psi} \\ \dot{\dot{\psi}}\end{bmatrix}dt} 
 	\approx \mathbf{x}_{k-1} + \begin{bmatrix}\dot{p}_x \\ \dot{p}_y \\ 0 \\ \dot{\psi}\Delta t \\ 0\end{bmatrix}
 \end{equation}
-
+%
 
 %%%-------------------------------------------------------------------------%%%
 %%%-------------------------------------------------------------------------%%%
