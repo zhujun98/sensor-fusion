@@ -1,5 +1,7 @@
 # Sensor Fusion with Kalman Filter
+Jun Zhu
 
+![alt text](theme.png)
 
 Sensor fusion with different implementions of Kalman filter.
 
