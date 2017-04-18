@@ -4,5 +4,5 @@
 *.synctex.gz
 
 *.idea
-
+cmake-build-debug
 *.ipynb_checkpoints
