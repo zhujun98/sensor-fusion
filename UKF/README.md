@@ -48,4 +48,4 @@ vy       | 0.52
 
 ## Summary
 
-Due to the discrepancy between these two data sets, it is difficult to tune the acceleration noise and yaw acceleration noise to meet the NIS requires of both. As a compromise, an acceleration noise of 0.7 m/s^2^ and a yaw acceleration noise of 0.6 rad/s^2 are used here.
+Due to the discrepancy between these two data sets, it is difficult to tune the acceleration noise and yaw acceleration noise to meet the NIS requires of both data sets. As a compromise, an acceleration noise of 0.7 m/s^2 and a yaw acceleration noise of 0.6 rad/s^2 are used here.
