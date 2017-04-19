@@ -15,5 +15,5 @@ if [ -f cmake-build-debug/UnscentedKF ] ; then
     cmake-build-debug/UnscentedKF $data $output
 else
     echo -e "\nSwitched to ./build directory"
-    build/Unscented $data $output
+    build/UnscentedKF $data $output
 fi

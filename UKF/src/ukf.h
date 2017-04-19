@@ -15,7 +15,7 @@ public:
   // the current NIS (normalized innovation squared) for radar
   double NIS_radar_;
 
-  // the current NIS for laser
+  // the current NIS for lidar
   double NIS_lidar_;
 
   // Constructor
@@ -71,7 +71,7 @@ private:
   // Radar measurement noise standard deviation radius change in m/s
   double std_radrd_;
 
-  // Measurement covariance matrices for LIDAR and RADAR
+  // Measurement covariance matrices for LIDAR and RADAR.
   Eigen::MatrixXd r_lidar_;
   Eigen::MatrixXd r_radar_;
 
@@ -88,32 +88,40 @@ private:
   double lambda_;
 
   //
-  // Prediction Predicts sigma points, the state, and the state covariance matrix
-  // @param delta_t Time between k and k+1 in s
+  // Prediction Predicts sigma points, the state, and the state covariance matrix.
+  // @param delta_t: Time step in s
   //
   void Prediction(double delta_t);
 
   //
-  // Updates the state and the state covariance matrix using a lidar measurement
-  // @param meas_package The measurement at k+1
+  // Updates the state and the state covariance matrix using a lidar measurement.
+  // @param meas_package: Measurement
+  // @param delta_t: Time step in second
   //
   void UpdateLidar(const MeasurementPackage &ms_pack, double delta_t);
 
   //
-  // Updates the state and the state covariance matrix using a radar measurement
-  // @param meas_package: The measurement at k+1
+  // Updates the state and the state covariance matrix using a radar measurement.
+  // @param meas_package: Measurement
+  // @param delta_t: Time step in second
   //
   void UpdateRadar(const MeasurementPackage &ms_pack, double delta_t);
 
   //
   // Generate sigma points.
+  // @param x: State vector
+  // @param P: Covariance matrix
+  // @param n_aug: Length of the augmented state vector
+  // @param lambda: Sigma point spreading parameter
   //
   Eigen::MatrixXd GenerateSigmaPoints(
       const Eigen::VectorXd &x, const Eigen::MatrixXd &P, int n_aug, double lambda);
 
   //
-  // Kalman filter measurement update
-  //
+  // Kalman filter measurement update.
+  // @param meas_package: Measurement
+  // @param Zsig: Measurement sigma points matrix
+  // @param n_z: Length of the measurement vector
   void MeasurementUpdate(
       const MeasurementPackage &ms_pack, const Eigen::MatrixXd &Zsig, int n_z);
 
