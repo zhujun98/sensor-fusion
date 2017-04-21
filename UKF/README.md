@@ -5,9 +5,9 @@ Jun Zhu
 
 ## Introduction
 
-In this project, a stream of simulated mixed LIDAR and RADAR data will be used to estimate the trajectory of an object moving in a curved trajectory by using the unscented Kalman filter for both data sets. The theory and formulas used in this project can be found [here](../KalmanFilter.pdf). The measurement noises for the LIDAR data are $\sigma_x$ = $\sigma_y$ = 0.15 m. The measurement noises for the RADAR data are $\sigma_r$ = 0.30 m, $\sigma_\phi$ = 0.03 rad and $\sigma_\dot{r}$ = 0.3 m/s. 
+In this project, a stream of simulated mixed LIDAR and RADAR data will be used to estimate the trajectory of an object moving in a curved trajectory by using the unscented Kalman filter for both data sets. The theory and formulas used in this project are summarized [here](../KalmanFilter.pdf). The measurement noises for the LIDAR data are $\sigma_x$ = $\sigma_y$ = 0.15 m. The measurement noises for the RADAR data are $\sigma_r$ = 0.30 m, $\sigma_\phi$ = 0.03 rad and $\sigma_\dot{r}$ = 0.3 m/s. 
 
-The motion model used in this project is the CTRV (constant turn rate and velocity) model, as shown below;
+The motion model used in this project is the __CTRV (constant turn rate and velocity)__ model, as shown below:
 
 ![CTRV](../images_KalmanFilter/CTRV%20model.png)
 
