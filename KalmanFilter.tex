@@ -66,10 +66,10 @@ The Kalman filter estimates a process by using a feedback control. The filter pr
 where \(\mathbf{x}_{k} \in \mathfrak{R}^{n}\) is the state vector and \(\mathbf{w}\sim N( 0,\mathbf{Q})\) is the process noise with \(\mathbf{Q}\) the covariance matrix. The measurement function is written as:
 %
 \begin{equation}
-	\mathbf{z}_{\mathbf{k}} = \mathbf{H}\mathbf{x}_{k} + \boldsymbol{\nu},
+	\mathbf{z}_{\mathbf{k}} = \mathbf{H}\mathbf{x}_{k} + \mathbf{v},
 \end{equation}
 %
-where \(\mathbf{z}_{k} \in \mathfrak{R}^{m}\) is the measurement vector and \(\boldsymbol{\nu}\sim N( 0,\mathbf{R})\) is the process noise with \(\mathbf{R}\) the covariance matrix.
+where \(\mathbf{z}_{k} \in \mathfrak{R}^{m}\) is the measurement vector and \(\mathbf{v}\sim N( 0,\mathbf{R})\) is the process noise with \(\mathbf{R}\) the covariance matrix.
 
 The equations used in the Kalman filter are listed in Table~\ref{tab:table-KF} \cite{Welch}. Here \(\mathbf{P}_{k}^{-}\) and \(\mathbf{P}_{k}\) are the priori and posteriori error covariance matrix, respectively, \(\mathbf{z}_{k} - \mathbf{H}\mathbf{x}_{k}^{-}\) is called the measurement innovation, and \(\mathbf{K}_{k}\) is chosen to minimize the posteriori error covariance.
 
@@ -98,7 +98,7 @@ The equations used in the Kalman filter are listed in Table~\ref{tab:table-KF} \
 In the LIDAR measurement, the state vector \(\mathbf{x}_{k}\) is given by
 %
 \begin{equation}
-	\mathbf{x}_{k} = \begin{bmatrix} p_{x} & p_{y} & v_{x} & v_{y}\end{bmatrix}^{T}.
+	\mathbf{x}_{k} = \begin{bmatrix} p_{x} & p_{y} & \dot{p}_{x} & \dot{p}_{y}\end{bmatrix}^{T}.
 \end{equation}
 %
 Assuming a linear motion, we have
@@ -135,7 +135,7 @@ The extended Kalman filter is used to solve the problem in which the state funct
 and/or the measurement function
 %
 \begin{equation}
-	\mathbf{z}_{k} = \mathbf{h}( \mathbf{x}_{k},\boldsymbol{\nu}_{k}).
+	\mathbf{z}_{k} = \mathbf{h}( \mathbf{x}_{k},\mathbf{v}_{k}).
 \end{equation}
 %
 are nonlinear.
@@ -158,10 +158,10 @@ The equations used in the extended Kalman filter are summarized in Table 2 \cite
 	H_{i,j} = \frac{\partial h_{i}}{\partial x_{j}}.
 \end{equation}
 %
-\(\mathbf{V}\) is the Jacobian matrix of partial derivatives of \(\mathbf{h}\) with respect to \(\boldsymbol{\nu}\), that is
+\(\mathbf{V}\) is the Jacobian matrix of partial derivatives of \(\mathbf{h}\) with respect to \(\mathbf{v}\), that is
 %
 \begin{equation}
-	V_{i,j} = \frac{\partial h_{i}}{\partial \nu_{j}}.
+	V_{i,j} = \frac{\partial h_{i}}{\partial v_{j}}.
 \end{equation}
 %
 It must be noted that in the extended Kalman filter the noise is no
@@ -178,7 +178,7 @@ longer normal after the nonlinear transformation.
 		\hline
 		$\begin{aligned}[t]
 			\mathbf{x}_{k}^{-} &= \mathbf{f}( \mathbf{x}_{k - 1}, \mathbf{0}) \\
-			\mathbf{P}_{k}^{-} &= \mathbf{F}\mathbf{P}_{k - 1}\mathbf{F}^{\mathbf{T}}\mathbf{+}\mathbf{W}_{\mathbf{k}}\mathbf{Q}_{k - 1}\mathbf{W}_{k}^{T}
+			\mathbf{P}_{k}^{-} &= \mathbf{F}\mathbf{P}_{k - 1}\mathbf{F}^{\mathbf{T}}\mathbf{+}\mathbf{W}_{\mathbf{k}}\mathbf{Q}_{k-1}\mathbf{W}_{k}^{T}
 		\end{aligned}$ &
 		$\begin{aligned}[t]
 			\mathbf{K}_{k} &= \mathbf{P}_{k}^{-}\mathbf{H}^{\mathbf{T}}( \mathbf{H}\mathbf{P}_{k}^{-}\mathbf{H}^{\mathbf{T}}\mathbf{+}\mathbf{V}_{k}\mathbf{R}_{k}\mathbf{V}_{k}^{T})^{- 1} \\
@@ -198,7 +198,7 @@ The RADAR measurement returns
 in the polar coordination system, which means the mapping from the state vector \(\mathbf{x}_{\mathbf{k}}\) to the measurement vector \(\mathbf{z}_{\mathbf{k}}\) is no longer linear. The transform equations from the Cartesian coordinate system to the polar coordinate system (\(\mathbf{h}\)) are given by
 %
 \begin{equation}
-	\rho = \sqrt{p_x^{2} + p_y^{2}},\ \varphi = \arctan( \frac{p_y}{p_x}),\ 	\dot{\rho} = \frac{p_x v_x + p_y v_y}{\sqrt{p_x^{2} + p_y^{2}}}.
+	\rho = \sqrt{p_x^{2} + p_y^{2}},\ \varphi = \arctan( \frac{p_y}{p_x}),\ 	\dot{\rho} = \frac{p_x \dot{p}_x + p_y \dot{p}_y}{\sqrt{p_x^{2} + p_y^{2}}}.
 \end{equation}
 %
 The Jacobian matrix of \(\mathbf{h}\) is
@@ -208,7 +208,7 @@ The Jacobian matrix of \(\mathbf{h}\) is
 	\mathbf{H} = \begin{bmatrix}
 	\frac{p_x}{\sqrt{p_x^{2} + p_y^{2}}} & \frac{p_y}{\sqrt{p_x^{2} + p_y^{2}}} & 0 & 0 \\
 	 - \frac{p_y}{p_x^{2} + p_y^{2}} & \frac{p_x}{p_x^{2} + p_y^{2}} & 0 & 0 \\
-	\frac{p_y( p_y v_x - p_x v_y)}{( p_x^{2} + p_y^{2})^{\frac{3}{2}}} & \frac{p_x( p_x v_y - p_y v_x)}{( p_x^{2} + p_y^{2})^{\frac{3}{2}}} & \frac{p_x}{\sqrt{p_x^{2} + p_y^{2}}} & \frac{p_y}{\sqrt{p_x^{2} + p_y^{2}}} \\
+	\frac{p_y( p_y \dot{p}_x - p_x \dot{p}_y)}{( p_x^{2} + p_y^{2})^{3/2}} & \frac{p_x( p_x \dot{p}_y - p_y \dot{p}_x)}{( p_x^{2} + p_y^{2})^{3/2}} & \frac{p_x}{\sqrt{p_x^{2} + p_y^{2}}} & \frac{p_y}{\sqrt{p_x^{2} + p_y^{2}}} \\
 	\end{bmatrix}.
 \end{equation}
 %
@@ -287,10 +287,10 @@ The sigma matrix and augmented sigma matrix at step $k$ are denoted as \(\mathbf
 - Time update (predict)
 %
 \begin{align}
-	\mathbf{\Sigma}_k^{x-} &= \mathbf{f}( \mathbf{\Sigma}^x_{k-1}, \mathbf{\Sigma}^w_{k-1}) \label{eq:UK_pre1} \\
+	\mathbf{\Sigma}_k^{x-} &= \mathbf{f}( \mathbf{\Sigma}^x_{k-1}, \mathbf{\Sigma}^\text{w}_{k-1}) \label{eq:UK_pre1} \\
 	\mathbf{x}_k^{-} &= \sum_{i=0}^{2L}{W_i^{(m)}\mathbf{\Sigma}^{x-}_{k,i}} 	\\		
 	\mathbf{P}_{k}^{-} &= \sum_{i=0}^{2L}{W_i^{(c)}(\mathbf{\Sigma}^{x-}_{k,i} - 		\mathbf{x}_k^{-})(\mathbf{\Sigma}^{x-}_{k,i} - \mathbf{x}_k^{-})^T} \label{eq:UK_pre3} \\
-	\mathbf{\Gamma}_k^- &= \mathbf{h}(\mathbf{\Sigma}_k^{x-}, \mathbf{\Sigma}^\nu_{k-1}) \label{eq:UK_pre4} \\ 
+	\mathbf{\Gamma}_k^- &= \mathbf{h}(\mathbf{\Sigma}_k^{x-}, \mathbf{\Sigma}^\text{v}_{k-1}) \label{eq:UK_pre4} \\ 
 	\mathbf{z}_k^{-} &= \sum_{i=0}^{2L}{W_i^{(m)}\mathbf{\Gamma}^{-}_{k,i}}
 \end{align}
 %
@@ -315,18 +315,31 @@ and
 respectively.
 
 In the case where the measurement noise are purely addictive, the measurement noise \(\mathbf{Q}\) should be removed from the augmentation equation \ref{eq:UK_aug}, and equation \ref{eq:UK_pre4} and \ref{eq:UK_cor1} become
-\begin{equation}
+\begin{equation} \label{eq:UKF_mea_add0}
 	\mathbf{\Gamma}_k^- = \mathbf{h}(\mathbf{\Sigma}_k^{x-})
 \end{equation}
 and
-\begin{equation}
+\begin{equation} \label{eq:UKF_mea_add1}
 	\mathbf{P}_{\mathbf{z}_k \mathbf{z}_k} = \sum_{i=0}^{2L}{W_i^{(c)}(\mathbf{\Gamma}^{-}_{k,i} - \mathbf{z}_k^{-})(\mathbf{\Gamma}^{-}_{k,i} - \mathbf{z}_k^{-})^T} + \mathbf{R},
 \end{equation}
 respectively.
 
 \subsection{UKF in CTRV model}
 
-The CTRV (Constant Turn Rate and Velocity) model
+\subsubsection{The CTRV (Constant Turn Rate and Velocity) model}
+
+The state vector and the velocity vector are given by
+\begin{equation}
+	\mathbf{x} = \begin{bmatrix}p_x & p_y & v & \psi & \dot{\psi}\end{bmatrix}^T 
+\end{equation}
+%
+and
+%
+\begin{equation}
+	\mathbf{v} = \begin{bmatrix}\dot{p}_x & \dot{p}_y & \dot{v} & \dot{\psi} & \ddot{\psi}\end{bmatrix}^T, 
+\end{equation}
+%
+respectively. Since the CTRV model is use, we have $\dot{v}=0$ and $\ddot{\psi}=0$.
 
 \begin{figure}[h]
 	\center
@@ -334,17 +347,46 @@ The CTRV (Constant Turn Rate and Velocity) model
 	\caption{Illustration of the CTRV model}
 	\label{fig:ctrv}
 \end{figure}
-%
-The state vector is given by
-\begin{equation}
-	\mathbf{x} = \begin{bmatrix}p_x \\ p_y \\ v \\ \psi \\ \dot{\psi}\end{bmatrix}. 
-\end{equation}
-%
+
 The time update function can be written as
 \begin{equation}
-	\mathbf{x}_{k} = \mathbf{x}_{k-1} + \int_{t_{k-1}}^{t_k} {\begin{bmatrix}\dot{p}_x \\ \dot{p}_y \\ \dot{v} \\ \dot{\psi} \\ \dot{\dot{\psi}}\end{bmatrix}dt} 
-	\approx \mathbf{x}_{k-1} + \begin{bmatrix}\dot{p}_x \\ \dot{p}_y \\ 0 \\ \dot{\psi}\Delta t \\ 0\end{bmatrix}
+	\mathbf{x}_{k} = 
+	\mathbf{x}_{k-1} + \int_{t_{k-1}}^{t_k} {\mathbf{v_{k-1}}dt} 
+	= \mathbf{x}_{k-1} + 
+	\begin{bmatrix} 
+		v_{k-1}\int_{t_{k-1}}^{t_k} cos(\psi_{k-1}(t))dt \\
+		v_{k-1}\int_{t_{k-1}}^{t_k} sin(\psi_{k-1}(t)) dt \\ 
+		0 \\ 
+		\dot{\psi}\Delta t \\ 
+		0 
+	\end{bmatrix} +
+	\begin{bmatrix} \frac{1}{2}w_a\Delta t^2cos(\psi_{k-1}(t)) \\
+	                \frac{1}{2}w_a\Delta t^2sin(\psi_{k-1}(t)) \\
+	                \text{w}_a\Delta t \\
+	                \text{w}_{\ddot{\phi}} \Delta t \\
+	                0
+	                \end{bmatrix}
 \end{equation}
+%
+where
+%
+\begin{equation}
+	v_{k-1}\int_{t_{k-1}}^{t_k} cos(\psi_{k-1}(t)) dt =
+	\begin{cases}
+	  v_{k-1}(sin(\psi_k) - sin(\psi_{k-1}))/\dot{\psi}_{k-1}, & \psi_{k-1} \neq 0 \\
+	  v_{k-1}cos(\psi_{k-1})\Delta t, &\psi_{k-1} = 0
+	\end{cases}
+\end{equation}
+and
+\begin{equation}
+	v_{k-1}\int_{t_{k-1}}^{t_k} sin(\psi_{k-1}(t)) dt =
+	\begin{cases}
+	  v_{k-1}(cos(\psi_{k-1}) - cos(\psi_{k}))/\dot{\psi}_{k-1}, & \psi_{k-1} \neq 0 \\
+	  v_{k-1}sin(\psi_{k-1})\Delta t, &\psi_{k-1} = 0
+	\end{cases}.
+\end{equation}
+%
+During the measurement update, equations \ref{eq:UKF_mea_add0} and \ref{eq:UKF_mea_add1} can be used.
 %
 %%%-------------------------------------------------------------------------%%%
 %%%-------------------------------------------------------------------------%%%
