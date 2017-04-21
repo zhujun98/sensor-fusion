@@ -5,7 +5,7 @@ Jun Zhu
 
 Sensor fusion with different implementions of Kalman filter.
 
-A stream of simulated mixed LIDAR and RADAR data will be used to estimate the trajectory of a car moving in curved trajectory.
+A stream of simulated mixed LIDAR and RADAR data will be used to estimate the trajectory of a car moving in curved trajectory. The theory used in this project is summarized [here](./KalmanFilter.pdf)
 
 ![alt text](flow_chart.png)
 
