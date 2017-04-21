@@ -1,8 +1,9 @@
 *.aux
 *.log
 *.out
+*.dvi
 *.synctex.gz
-
+References
 *.idea
 cmake-build-debug
 *.ipynb_checkpoints
