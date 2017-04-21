@@ -70,6 +70,8 @@ Eigen::MatrixXd Utilities::CalculateJacobian(const Eigen::VectorXd &x) {
 
   double px = x[0];
   double py = x[1];
+  double vx = x[2];
+  double vy = x[3];
 
   double c1 = px*px + py*py;
   if (c1 < 1e-12 ) { c1 = 1e-12; }
@@ -80,7 +82,7 @@ Eigen::MatrixXd Utilities::CalculateJacobian(const Eigen::VectorXd &x) {
 
   h_j << px/c2, py/c2, 0, 0,
       -py/c1, px/c1, 0, 0,
-      py*(py*x[2] - px*x[3])/c3, px*(px*x[3] - py*x[2])/c3, px/c2, py/c2;
+      py*(py*vx - px*vy)/c3, px*(px*vy - py*vx)/c3, px/c2, py/c2;
 
   return h_j;
 }
