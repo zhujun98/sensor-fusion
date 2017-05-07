@@ -208,9 +208,8 @@ int main(int argc, char* argv[]) {
   }
 
   // compute the accuracy (RMSE)
-  Utilities utilities;
   std::cout << "Accuracy - RMSE:" << std::endl
-       << utilities.CalculateRMSE(estimations, ground_truth) << std::endl;
+       << Utilities::CalculateRMSE(estimations, ground_truth) << std::endl;
 
   // close files
   if (out_file_.is_open()) {

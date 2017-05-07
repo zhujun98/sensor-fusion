@@ -5,15 +5,7 @@
 #include "../../Eigen/Dense"
 
 
-class Utilities {
-public:
-
-  // Constructor
-  Utilities();
-
-  // Destructor
-  virtual ~Utilities();
-
+namespace Utilities {
   //
   // Calculate root mean square error.
   //

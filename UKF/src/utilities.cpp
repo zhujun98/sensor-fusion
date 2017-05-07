@@ -4,10 +4,6 @@
 
 const double kPI = std::atan(1.0)*4;
 
-Utilities::Utilities() {}
-
-Utilities::~Utilities() {}
-
 Eigen::VectorXd Utilities::CalculateRMSE(
     const std::vector<Eigen::VectorXd> &estimations,
     const std::vector<Eigen::VectorXd> &ground_truth) {

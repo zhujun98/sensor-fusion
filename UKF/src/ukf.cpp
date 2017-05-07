@@ -215,8 +215,7 @@ void UKF::Prediction(double delta_t) {
   for (int i=0; i<2*n_aug_+1; ++i) {
     Eigen::VectorXd x_diff = Xsig_pred_.col(i) - x_;
 
-    Utilities utilities;
-    x_diff(3) = utilities.normalize_angle(x_diff(3));
+    x_diff(3) = Utilities::normalize_angle(x_diff(3));
 
     P_ += weights_(i)*x_diff*x_diff.transpose();
   }
@@ -225,8 +224,6 @@ void UKF::Prediction(double delta_t) {
 void UKF::UpdateLidar(const MeasurementPackage &ms_pack, double delta_t) {
 
   Prediction(delta_t);
-
-  Utilities utilities;
 
   const int n_z = 2;
   Eigen::MatrixXd Zsig = Eigen::MatrixXd(n_z, 2*n_aug_+1);
@@ -243,8 +240,6 @@ void UKF::UpdateLidar(const MeasurementPackage &ms_pack, double delta_t) {
 void UKF::UpdateRadar(const MeasurementPackage &ms_pack, double delta_t) {
 
   Prediction(delta_t);
-
-  Utilities utilities;
 
   const int n_z = 3;
   Eigen::MatrixXd Zsig = Eigen::MatrixXd(n_z, 2*n_aug_+1);
@@ -278,8 +273,6 @@ void UKF::MeasurementUpdate(
 
   Eigen::VectorXd z_pred = Eigen::VectorXd(n_z);
 
-  Utilities utilities;
-
   //calculate mean predicted measurement
   z_pred.fill(0.0);
   for (int i=0; i< 2*n_aug_+1; ++i) {
@@ -293,7 +286,7 @@ void UKF::MeasurementUpdate(
   for (int i=0; i< 2*n_aug_+1; ++i) {
     Eigen::VectorXd z_diff = Zsig.col(i) - z_pred;
     if (ms_pack.sensor_type_ == MeasurementPackage::RADAR) {
-      z_diff(1) = utilities.normalize_angle(z_diff(1));
+      z_diff(1) = Utilities::normalize_angle(z_diff(1));
     }
 
     S += weights_(i)*z_diff*z_diff.transpose();
@@ -313,12 +306,12 @@ void UKF::MeasurementUpdate(
     //residual
     Eigen::VectorXd z_diff = Zsig.col(i) - z_pred;
     if (ms_pack.sensor_type_ == MeasurementPackage::RADAR) {
-      z_diff(1) = utilities.normalize_angle(z_diff(1));
+      z_diff(1) = Utilities::normalize_angle(z_diff(1));
     }
 
     // state difference
     Eigen::VectorXd x_diff = Xsig_pred_.col(i) - x_;
-    x_diff(3) = utilities.normalize_angle(x_diff(3));
+    x_diff(3) = Utilities::normalize_angle(x_diff(3));
 
     Tc += weights_(i)*x_diff*z_diff.transpose();
   }
@@ -330,7 +323,7 @@ void UKF::MeasurementUpdate(
   //residual
   Eigen::VectorXd z_diff = ms_pack.raw_measurements_ - z_pred;
   if (ms_pack.sensor_type_ == MeasurementPackage::RADAR) {
-    z_diff(1) = utilities.normalize_angle(z_diff(1));
+    z_diff(1) = Utilities::normalize_angle(z_diff(1));
   }
 
   //update state mean and covariance matrix
