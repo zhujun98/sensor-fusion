@@ -84,20 +84,19 @@ void UKF::ProcessMeasurement(const MeasurementPackage &ms_pack) {
   if (! is_initialized_) {
 
     if (ms_pack.sensor_type_ == MeasurementPackage::RADAR) {
-      double rho = ms_pack.raw_measurements_[0];
-      double phi = ms_pack.raw_measurements_[1];
+      const double rho = ms_pack.raw_measurements_[0];
+      const double phi = ms_pack.raw_measurements_[1];
       // double v_rho = ms_pack.raw_measurements_[2];
 
       // Convert positions and velocities from polar to CTRV coordinates.
-      double p_x = rho * std::cos(phi);
-      double p_y = rho * std::sin(phi);
-      x_ << p_x, p_y, 0.0, phi, 0.0;
+      const double p_x = rho * std::cos(phi);
+      const double p_y = rho * std::sin(phi);
+      x_ << p_x, p_y, 0.0, 0.0, 0.0;
 
     } else if (ms_pack.sensor_type_ == MeasurementPackage::LIDAR) {
-      double p_x = ms_pack.raw_measurements_[0];
-      double p_y = ms_pack.raw_measurements_[1];
-      double phi = std::atan2(p_y, p_x);
-      x_ << p_x, p_y, 0.0, phi, 0.0;
+      const double p_x = ms_pack.raw_measurements_[0];
+      const double p_y = ms_pack.raw_measurements_[1];
+      x_ << p_x, p_y, 0.0, 0.0, 0.0;
 
     } else {
       std::cerr << "Unknown sensor_type_: " << ms_pack.sensor_type_
@@ -114,7 +113,7 @@ void UKF::ProcessMeasurement(const MeasurementPackage &ms_pack) {
     return;
   }
 
-  double dt = (ms_pack.timestamp_ - time_us_)/1000000.0;
+  const double dt = (ms_pack.timestamp_ - time_us_)/1000000.0;
 
   // Measurement update
   if (ms_pack.sensor_type_ == MeasurementPackage::RADAR
@@ -161,13 +160,13 @@ void UKF::Prediction(double delta_t) {
   //
   for (int i = 0; i< 2*n_aug_ + 1; ++i)
   {
-    double p_x = Xsig_aug(0,i);
-    double p_y = Xsig_aug(1,i);
-    double v = Xsig_aug(2,i);
-    double yaw = Xsig_aug(3,i);
-    double yawd = Xsig_aug(4,i);
-    double nu_a = Xsig_aug(5,i);
-    double nu_yawdd = Xsig_aug(6,i);
+    const double p_x = Xsig_aug(0,i);
+    const double p_y = Xsig_aug(1,i);
+    const double v = Xsig_aug(2,i);
+    const double yaw = Xsig_aug(3,i);
+    const double yawd = Xsig_aug(4,i);
+    const double nu_a = Xsig_aug(5,i);
+    const double nu_yawdd = Xsig_aug(6,i);
 
     //Predicted state values
     double p_x_p, p_y_p;
@@ -229,7 +228,7 @@ void UKF::UpdateLidar(const MeasurementPackage &ms_pack, double delta_t) {
 
   Utilities utilities;
 
-  int n_z = 2;
+  const int n_z = 2;
   Eigen::MatrixXd Zsig = Eigen::MatrixXd(n_z, 2*n_aug_+1);
 
   //transform sigma points into measurement space
@@ -247,21 +246,27 @@ void UKF::UpdateRadar(const MeasurementPackage &ms_pack, double delta_t) {
 
   Utilities utilities;
 
-  int n_z = 3;
+  const int n_z = 3;
   Eigen::MatrixXd Zsig = Eigen::MatrixXd(n_z, 2*n_aug_+1);
 
   //transform sigma points into measurement space
   for (int i = 0; i < 2*n_aug_+1; ++i) {
-    double p_x = Xsig_pred_(0, i);
-    double p_y = Xsig_pred_(1, i);
-    double v = Xsig_pred_(2, i);
-    double yaw = Xsig_pred_(3, i);
+    const double p_x = Xsig_pred_(0, i);
+    const double p_y = Xsig_pred_(1, i);
+    const double v = Xsig_pred_(2, i);
+    const double yaw = Xsig_pred_(3, i);
 
     double rho = std::sqrt(p_x * p_x + p_y * p_y);
+
     // Avoid division by zero
     if (rho < 1e-6) { rho = 1e-6; }
     Zsig(0, i) = rho;
-    Zsig(1, i) = std::atan2(p_y, p_x);
+
+    if (p_x == 0 && p_y == 0) {
+      Zsig(1, i) = 0.0; // atan(0, 0) is defined in c++ 11
+    } else {
+      Zsig(1, i) = std::atan2(p_y, p_x);
+    }
     Zsig(2, i) = (p_x * std::cos(yaw) * v + p_y * std::sin(yaw) * v) / rho;
   }
 
@@ -350,9 +355,10 @@ Eigen::MatrixXd UKF::GenerateSigmaPoints(
   Eigen::MatrixXd Xsig = Eigen::MatrixXd(n, 2*n_aug+1);
 
   Xsig.col(0) = x;
+  const double c = std::sqrt(lambda + n);
   for (int i = 0; i < n; ++i) {
-    Xsig.col(i + 1) = x + std::sqrt(lambda + n)*A.col(i);
-    Xsig.col(i + n + 1) = x - std::sqrt(lambda + n)*A.col(i);
+    Xsig.col(i + 1) = x + c*A.col(i);
+    Xsig.col(i + n + 1) = x - c*A.col(i);
   }
 
   return Xsig;
