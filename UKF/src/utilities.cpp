@@ -27,10 +27,10 @@ Eigen::VectorXd Utilities::CalculateRMSE(
 }
 
 double Utilities::normalize_angle(double phi) {
-  if (phi < -1.0*kPI || phi > kPI) {
-    double s = std::sin(phi);
-    phi = std::asin(s);
-  }
 
-  return phi;
+  double phi_norm = std::fmod(phi, 2*kPI);
+  if (phi_norm <= -kPI) { phi_norm += 2*kPI; }
+  if (phi_norm > kPI) { phi_norm -= 2*kPI; }
+
+  return phi_norm;
 }
