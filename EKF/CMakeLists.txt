@@ -1,13 +1,15 @@
-project(ExtendedKF)
+cmake_minimum_required (VERSION 3.1)
 
-cmake_minimum_required (VERSION 3.5)
+project(ExtendedKF LANGUAGES CXX)
 
-add_definitions(-std=c++0x)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(sources
-        src/fusion_ekf.cpp
+    src/fusion_ekf.cpp
     src/kalman_filter.cpp
     src/main.cpp
-        src/utilities.cpp)
+    src/utilities.cpp)
 
-add_executable(ExtendedKF ${sources})
+add_executable(ekf ${sources})

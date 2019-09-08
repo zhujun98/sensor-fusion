@@ -1,12 +1,14 @@
-project(UnscentedKF)
+cmake_minimum_required (VERSION 3.1)
 
-cmake_minimum_required (VERSION 3.5)
+project(UnscentedKF LANGUAGES CXX)
 
-add_definitions(-std=c++0x)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(sources
-   src/ukf.cpp
-   src/main.cpp
-   src/utilities.cpp)
+    src/ukf.cpp
+    src/main.cpp
+    src/utilities.cpp)
 
-add_executable(UnscentedKF ${sources})
+add_executable(ukf ${sources})
