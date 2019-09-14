@@ -11,6 +11,17 @@ The motion model used in this project is the __CTRV (constant turn rate and velo
 
 ![CTRV](../images_KalmanFilter/CTRV%20model.png)
 
+## Dependencies
+
+#### [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) >= 3.3.3
+
+```shell script
+$ git clone --branch 3.3.7 https://github.com/eigenteam/eigen-git-mirror.git
+$ cd eigen-git-mirror
+$ mkdir build && cd build
+$ cmake .. && make install
+```
+
 ## Simulation results
 
 The results for two data sets with UKF implementation are shown below.

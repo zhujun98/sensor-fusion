@@ -1,15 +1,19 @@
+/*
+ * Author: Jun Zhu, zhujun981661@gmail.com
+ */
+
 #include <fstream>
 #include <iostream>
-#include <sstream>
 #include <vector>
-#include "../../Eigen/Dense"
+#include <Eigen/Dense>
+
 #include "ukf.h"
 #include "ground_truth_package.h"
 #include "measurement_package.h"
 #include "utilities.h"
 
 
-void check_arguments(int argc, char* argv[]) {
+void checkArguments(int argc, char* argv[]) {
   std::string usage_instructions = "Usage instructions: ";
   usage_instructions += argv[0];
   usage_instructions += " path/to/input.txt output.txt";
@@ -33,7 +37,7 @@ void check_arguments(int argc, char* argv[]) {
   }
 }
 
-void check_files(std::ifstream& in_file, std::string& in_name,
+void checkFiles(std::ifstream& in_file, std::string& in_name,
                  std::ofstream& out_file, std::string& out_name) {
   if (!in_file.is_open()) {
     std::cerr << "Cannot open input file: " << in_name << std::endl;
@@ -46,9 +50,34 @@ void check_files(std::ifstream& in_file, std::string& in_name,
   }
 }
 
+//
+// Calculate root mean square error.
+//
+Eigen::VectorXd calculateRMSE(
+    const std::vector<Eigen::VectorXd> &estimations,
+    const std::vector<Eigen::VectorXd> &ground_truth) {
+
+  Eigen::VectorXd rmse(4);
+  rmse << 0, 0, 0, 0;
+
+  for (std::size_t i=0; i != estimations.size(); ++i) {
+    Eigen::VectorXd residual = estimations[i] - ground_truth[i];
+
+    residual = residual.array()*residual.array();
+
+    rmse += residual;
+  }
+
+  rmse /= estimations.size();
+
+  rmse = rmse.array().sqrt();
+
+  return rmse;
+}
+
 int main(int argc, char* argv[]) {
 
-  check_arguments(argc, argv);
+  checkArguments(argc, argv);
 
   std::string in_file_name_ = argv[1];
   std::ifstream in_file_(in_file_name_.c_str(), std::ifstream::in);
@@ -56,7 +85,7 @@ int main(int argc, char* argv[]) {
   std::string out_file_name_ = argv[2];
   std::ofstream out_file_(out_file_name_.c_str(), std::ofstream::out);
 
-  check_files(in_file_, in_file_name_, out_file_, out_file_name_);
+  checkFiles(in_file_, in_file_name_, out_file_, out_file_name_);
 
   //
   // Set Measurements
@@ -156,7 +185,7 @@ int main(int argc, char* argv[]) {
 
   for (size_t k = 0; k < number_of_measurements; ++k) {
     // Call the UKF-based fusion
-    ukf.ProcessMeasurement(measurement_pack_list[k]);
+    ukf.processMeasurement(measurement_pack_list[k]);
 
     // output the estimation
     out_file_ << ukf.x_(0) << "\t"; // pos1 - est
@@ -209,7 +238,7 @@ int main(int argc, char* argv[]) {
 
   // compute the accuracy (RMSE)
   std::cout << "Accuracy - RMSE:" << std::endl
-       << Utilities::CalculateRMSE(estimations, ground_truth) << std::endl;
+       << calculateRMSE(estimations, ground_truth) << std::endl;
 
   // close files
   if (out_file_.is_open()) {
