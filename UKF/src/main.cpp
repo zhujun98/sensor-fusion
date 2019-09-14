@@ -32,13 +32,11 @@ void checkArguments(int argc, char* argv[]) {
     std::cerr << "Too many arguments.\n" << usage_instructions << std::endl;
   }
 
-  if (!has_valid_args) {
-    exit(EXIT_FAILURE);
-  }
+  if (!has_valid_args) exit(EXIT_FAILURE);
 }
 
 void checkFiles(std::ifstream& in_file, std::string& in_name,
-                 std::ofstream& out_file, std::string& out_name) {
+                std::ofstream& out_file, std::string& out_name) {
   if (!in_file.is_open()) {
     std::cerr << "Cannot open input file: " << in_name << std::endl;
     exit(EXIT_FAILURE);
@@ -107,7 +105,7 @@ int main(int argc, char* argv[]) {
     // reads first element from the current line
     iss >> sensor_type;
 
-    if (sensor_type.compare("L") == 0) {
+    if (sensor_type == "L") {
       // laser measurement
 
       // read measurements at this timestamp
@@ -121,7 +119,7 @@ int main(int argc, char* argv[]) {
       iss >> timestamp;
       meas_package.timestamp_ = timestamp;
       measurement_pack_list.push_back(meas_package);
-    } else if (sensor_type.compare("R") == 0) {
+    } else if (sensor_type == "R") {
       // radar measurement
 
       // read measurements at this timestamp
@@ -138,8 +136,7 @@ int main(int argc, char* argv[]) {
       meas_package.timestamp_ = timestamp;
       measurement_pack_list.push_back(meas_package);
     } else {
-      std::cerr << "Unknown sensor type: " << meas_package.sensor_type_
-                << std::endl;
+      std::cerr << "Unknown sensor type: " << meas_package.sensor_type_ << std::endl;
       exit(EXIT_FAILURE);
     }
 
@@ -233,21 +230,16 @@ int main(int argc, char* argv[]) {
     
     estimations.push_back(ukf_x_cartesian_);
     ground_truth.push_back(gt_pack_list[k].gt_values_);
-
   }
 
   // compute the accuracy (RMSE)
   std::cout << "Accuracy - RMSE:" << std::endl
-       << calculateRMSE(estimations, ground_truth) << std::endl;
+            << calculateRMSE(estimations, ground_truth) << std::endl;
 
   // close files
-  if (out_file_.is_open()) {
-    out_file_.close();
-  }
+  if (out_file_.is_open()) out_file_.close();
 
-  if (in_file_.is_open()) {
-    in_file_.close();
-  }
+  if (in_file_.is_open()) in_file_.close();
 
   std::cout << "Done!" <<  std::endl;
   return 0;

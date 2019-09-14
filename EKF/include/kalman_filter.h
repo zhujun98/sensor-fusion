@@ -11,6 +11,8 @@ class KalmanFilter {
 
 public:
 
+  // TODO: this is a pool desired and only used for education
+
   // state vector
   Eigen::VectorXd x_;
 
@@ -33,7 +35,7 @@ private:
   void predict();
 
   //
-  // Update the Kalman gain k. Use in both KF() and EKF()
+  // Update the Kalman gain k. Used in both KF() and EKF()
   // @param: p: priori error covariance matrix
   // @param: h: measurement matrix (or the Jacobian)
   // @param: r: measurement covariance matrix
