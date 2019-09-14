@@ -13,8 +13,7 @@ endif()
 
 set(sources
     src/ukf.cpp
-    src/main.cpp
-    src/utilities.cpp)
+    src/main.cpp)
 
 add_executable(ukf ${sources})
 

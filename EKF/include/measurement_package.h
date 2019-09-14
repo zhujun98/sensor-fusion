@@ -1,3 +1,7 @@
+/*
+ * Author: Jun Zhu, zhujun981661@gmail.com
+ */
+
 #ifndef MEASUREMENT_PACKAGE_H_
 #define MEASUREMENT_PACKAGE_H_
 

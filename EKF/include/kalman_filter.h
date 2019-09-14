@@ -1,3 +1,7 @@
+/*
+ * Author: Jun Zhu, zhujun981661@gmail.com
+ */
+
 #ifndef KALMAN_FILTER_H_
 #define KALMAN_FILTER_H_
 
@@ -22,11 +26,9 @@ public:
   // Linear measurement matrix
   Eigen::MatrixXd h_;
 
-  // Constructor
-  KalmanFilter();
+  KalmanFilter() = default;
 
-  // Destructor
-  virtual ~KalmanFilter();
+  ~KalmanFilter() = default;
 
   //
   // A full cycle (prediction + measurement update) using
@@ -34,7 +36,7 @@ public:
   // @param z: measurement
   // @param r: measurement covariance matrix
   //
-  void KF(const Eigen::VectorXd &z, const Eigen::MatrixXd &r);
+  void update(const Eigen::VectorXd &z, const Eigen::MatrixXd &r);
 
   //
   // A full cycle (prediction + measurement update) using
@@ -42,13 +44,13 @@ public:
   // @param z: measurement
   // @param r: measurement covariance matrix
   //
-  void EKF(const Eigen::VectorXd &z, const Eigen::MatrixXd &r);
+  void updateEKF(const Eigen::VectorXd &z, const Eigen::MatrixXd &r);
 
 private:
   //
   // Predict the state and the state covariance using the process model
   //
-  void Predict();
+  void predict();
 
   //
   // Update the Kalman gain k. Use in both KF() and EKF()
@@ -56,7 +58,7 @@ private:
   // @param: h: measurement matrix (or the Jacobian)
   // @param: r: measurement covariance matrix
   //
-  Eigen::MatrixXd UpdateKalmanGain(
+  Eigen::MatrixXd updateKalmanGain(
       const Eigen::MatrixXd &p, const Eigen::MatrixXd &h,
       const Eigen::MatrixXd &r);
 };

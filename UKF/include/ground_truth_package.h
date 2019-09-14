@@ -1,3 +1,7 @@
+/*
+ * Author: Jun Zhu, zhujun981661@gmail.com
+ */
+
 #ifndef GROUND_TRUTH_PACKAGE_H_
 #define GROUND_TRUTH_PACKAGE_H_
 

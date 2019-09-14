@@ -14,8 +14,7 @@ endif()
 set(sources
     src/fusion_ekf.cpp
     src/kalman_filter.cpp
-    src/main.cpp
-    src/utilities.cpp)
+    src/main.cpp)
 
 add_executable(ekf ${sources})
 

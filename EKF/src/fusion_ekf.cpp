@@ -1,3 +1,7 @@
+/*
+ * Author: Jun Zhu, zhujun981661@gmail.com
+ */
+
 #include <iostream>
 
 #include "fusion_ekf.h"
@@ -47,9 +51,9 @@ FusionEKF::FusionEKF() {
 
 }
 
-FusionEKF::~FusionEKF() {}
+FusionEKF::~FusionEKF() = default;
 
-void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
+void FusionEKF::processMeasurement(const MeasurementPackage &measurement_pack) {
 
   // Initialization
   if (!is_initialized_) {
@@ -63,8 +67,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
           measurement_pack.raw_measurements_[2];
 
       // Convert positions and velocities from polar to cartesian coordinates.
-      Utilities utilities;
-      ekf_.x_ = utilities.Polar2Cartesian(x_polar);
+      ekf_.x_ = utilities::polar2Cartesian(x_polar);
     } else if (measurement_pack.sensor_type_ == MeasurementPackage::LIDAR) {
       ekf_.x_ << measurement_pack.raw_measurements_[0],
           measurement_pack.raw_measurements_[1], 0, 0;
@@ -80,8 +83,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   }
 
   // Compute the time elapsed between the current and previous measurements
-  double dt = (measurement_pack.timestamp_ - time_us_)
-              / 1000000.0;  // In second
+  double dt = (measurement_pack.timestamp_ - time_us_) / 1000000.0;  // In second
 
   // Update the state transition matrix f according to the new elapsed time.
   ekf_.f_(0, 2) = dt;
@@ -102,10 +104,10 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   // Prediction and Measurement updating
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR
       && use_radar_) {
-    ekf_.EKF(measurement_pack.raw_measurements_, r_radar_);
+    ekf_.updateEKF(measurement_pack.raw_measurements_, r_radar_);
   } else if (measurement_pack.sensor_type_ == MeasurementPackage::LIDAR
              && use_lidar_) {
-    ekf_.KF(measurement_pack.raw_measurements_, r_lidar_);
+    ekf_.update(measurement_pack.raw_measurements_, r_lidar_);
   } else {
     return;
   }

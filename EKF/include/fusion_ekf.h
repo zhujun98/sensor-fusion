@@ -1,3 +1,7 @@
+/*
+ * Author: Jun Zhu, zhujun981661@gmail.com
+ */
+
 #ifndef FusionEKF_H_
 #define FusionEKF_H_
 
@@ -10,19 +14,16 @@
 class FusionEKF {
 public:
 
-  // Constructor
   FusionEKF();
 
-  // Destructor
-  virtual ~FusionEKF();
+  ~FusionEKF();
 
-  // KalmanFilter() object.
   KalmanFilter ekf_;
 
   //
   // Run the whole flow of the Kalman Filter from here.
   //
-  void ProcessMeasurement(const MeasurementPackage &measurement_pack);
+  void processMeasurement(const MeasurementPackage &measurement_pack);
 
   // if this is false, lidar measurements will be ignored (except for init)
   bool use_lidar_;
