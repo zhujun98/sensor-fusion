@@ -12,29 +12,6 @@
 
 class UKF {
 
-public:
-
-  // state vector: [pos1 pos2 vel_abs yaw_angle yaw_rate] in SI units and rad
-  Eigen::VectorXd x_;
-
-  // the current NIS (normalized innovation squared) for radar
-  double NIS_radar_;
-
-  // the current NIS for lidar
-  double NIS_lidar_;
-
-  UKF();
-
-  ~UKF();
-
-  //
-  // processMeasurement
-  // @param ms_pack The latest measurement data of either radar or laser
-  //
-  void processMeasurement(const MeasurementPackage &ms_pack);
-
-private:
-
   // initially set to false, set to true in first call of processMeasurement
   bool is_initialized_;
 
@@ -117,16 +94,40 @@ private:
   // @param n_aug: Length of the augmented state vector
   // @param lambda: Sigma point spreading parameter
   //
-  Eigen::MatrixXd generateSigmaPoints(
-      const Eigen::VectorXd &x, const Eigen::MatrixXd &P, int n_aug, double lambda);
+  Eigen::MatrixXd generateSigmaPoints(const Eigen::VectorXd &x,
+                                      const Eigen::MatrixXd &P,
+                                      int n_aug,
+                                      double lambda);
 
   //
   // Kalman filter measurement update.
   // @param meas_package: Measurement
   // @param Zsig: Measurement sigma points matrix
   // @param n_z: Length of the measurement vector
-  void measurementUpdate(
-      const MeasurementPackage &ms_pack, const Eigen::MatrixXd &Zsig, int n_z);
+  void measurementUpdate(const MeasurementPackage &ms_pack,
+                         const Eigen::MatrixXd &Zsig,
+                         int n_z);
+
+public:
+
+  // state vector: [pos1 pos2 vel_abs yaw_angle yaw_rate] in SI units and rad
+  Eigen::VectorXd x_;
+
+  // the current NIS (normalized innovation squared) for radar
+  double NIS_radar_;
+
+  // the current NIS for lidar
+  double NIS_lidar_;
+
+  UKF();
+
+  ~UKF();
+
+  //
+  // processMeasurement
+  // @param ms_pack The latest measurement data of either radar or laser
+  //
+  void processMeasurement(const MeasurementPackage &ms_pack);
 
 };
 

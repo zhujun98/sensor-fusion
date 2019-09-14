@@ -56,13 +56,13 @@ UKF::UKF() {
 
   //measurement covariance matrices for LIDAR and RADIA
   r_lidar_ = Eigen::MatrixXd(2, 2);
-  r_lidar_ << std_lidpx_*std_lidpx_, 0,
-              0, std_lidpy_*std_lidpy_;
+  r_lidar_ << std_lidpx_*std_lidpx_,                     0,
+                                  0, std_lidpy_*std_lidpy_;
 
   r_radar_ = Eigen::MatrixXd(3, 3);
-  r_radar_ << std_radr_*std_radr_, 0, 0,
-              0, std_radphi_*std_radphi_, 0,
-              0, 0, std_radrd_*std_radrd_;
+  r_radar_ << std_radr_*std_radr_,                       0,                      0,
+                                0, std_radphi_*std_radphi_,                      0,
+                                0,                        0, std_radrd_*std_radrd_;
 
   // Length of augmented state vector
   n_aug_ = 7;
@@ -121,15 +121,11 @@ void UKF::processMeasurement(const MeasurementPackage &ms_pack) {
   const double dt = (ms_pack.timestamp_ - time_us_)/1000000.0;
 
   // Measurement update
-  if (ms_pack.sensor_type_ == MeasurementPackage::RADAR
-      && use_radar_) {
+  if (ms_pack.sensor_type_ == MeasurementPackage::RADAR && use_radar_) {
     updateRadar(ms_pack, dt);
-  } else if (ms_pack.sensor_type_ == MeasurementPackage::LIDAR
-             && use_lidar_) {
+  } else if (ms_pack.sensor_type_ == MeasurementPackage::LIDAR && use_lidar_) {
     updateLidar(ms_pack, dt);
-  } else {
-    return;
-  }
+  } else return;
 
   // The latest time update should be put here since the update may
   // be skipped, e.g. for the RADAR measurement.

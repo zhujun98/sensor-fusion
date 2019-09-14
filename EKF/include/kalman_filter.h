@@ -7,10 +7,10 @@
 
 #include <Eigen/Dense>
 
-
 class KalmanFilter {
 
 public:
+
   // state vector
   Eigen::VectorXd x_;
 
@@ -25,6 +25,24 @@ public:
 
   // Linear measurement matrix
   Eigen::MatrixXd h_;
+
+private:
+  //
+  // Predict the state and the state covariance using the process model
+  //
+  void predict();
+
+  //
+  // Update the Kalman gain k. Use in both KF() and EKF()
+  // @param: p: priori error covariance matrix
+  // @param: h: measurement matrix (or the Jacobian)
+  // @param: r: measurement covariance matrix
+  //
+  Eigen::MatrixXd updateKalmanGain(
+      const Eigen::MatrixXd &p, const Eigen::MatrixXd &h,
+      const Eigen::MatrixXd &r);
+
+public:
 
   KalmanFilter() = default;
 
@@ -46,21 +64,6 @@ public:
   //
   void updateEKF(const Eigen::VectorXd &z, const Eigen::MatrixXd &r);
 
-private:
-  //
-  // Predict the state and the state covariance using the process model
-  //
-  void predict();
-
-  //
-  // Update the Kalman gain k. Use in both KF() and EKF()
-  // @param: p: priori error covariance matrix
-  // @param: h: measurement matrix (or the Jacobian)
-  // @param: r: measurement covariance matrix
-  //
-  Eigen::MatrixXd updateKalmanGain(
-      const Eigen::MatrixXd &p, const Eigen::MatrixXd &h,
-      const Eigen::MatrixXd &r);
 };
 
 #endif /* KALMAN_FILTER_H_ */
