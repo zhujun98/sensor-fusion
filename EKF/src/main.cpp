@@ -162,8 +162,7 @@ int main(int argc, char* argv[]) {
   //Call the EKF-based fusion
   std::size_t N = measurement_pack_list.size();
   for (std::size_t k = 0; k < N; ++k) {
-    // start filtering from the second frame (the speed is unknown in the first
-    // frame)
+    // start filtering from the second frame (the speed is unknown in the first frame)
     fusion_ekf.processMeasurement(measurement_pack_list[k]);
 
     // output the estimation
@@ -177,8 +176,7 @@ int main(int argc, char* argv[]) {
       // output the estimation
       out_file_ << measurement_pack_list[k].raw_measurements_(0) << "\t";
       out_file_ << measurement_pack_list[k].raw_measurements_(1) << "\t";
-    } else if (measurement_pack_list[k].sensor_type_
-               == MeasurementPackage::RADAR) {
+    } else if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::RADAR) {
       // output the estimation in the cartesian coordinates
       double rho = measurement_pack_list[k].raw_measurements_(0);
       double phi = measurement_pack_list[k].raw_measurements_(1);
@@ -201,13 +199,9 @@ int main(int argc, char* argv[]) {
             << calculateRMSE(estimations, ground_truth) << std::endl;
 
   // close files
-  if (out_file_.is_open()) {
-    out_file_.close();
-  }
+  if (out_file_.is_open()) out_file_.close();
 
-  if (in_file_.is_open()) {
-    in_file_.close();
-  }
+  if (in_file_.is_open()) in_file_.close();
 
   return 0;
 }
