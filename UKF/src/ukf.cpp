@@ -351,7 +351,7 @@ Eigen::MatrixXd UKF::generateSigmaPoints(const Eigen::VectorXd &x,
 
   Xsig.col(0) = x;
   const double c = std::sqrt(lambda + n);
-  for (int i = 0; i < n; ++i) {
+  for (std::size_t i = 0; i < n; ++i) {
     Xsig.col(i + 1) = x + c*A.col(i);
     Xsig.col(i + n + 1) = x - c*A.col(i);
   }

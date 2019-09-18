@@ -1,10 +1,14 @@
+References
 *.aux
 *.log
 *.out
 *.dvi
 *.synctex.gz
-References
+
 *.idea
 cmake-build-debug
+build
+
 *.ipynb_checkpoints
 kalman_track
+output*.txt
