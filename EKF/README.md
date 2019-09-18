@@ -20,6 +20,21 @@ $ mkdir build && cd build
 $ cmake .. && make install
 ```
 
+## Build and run
+
+#### Build
+
+```shell script
+$ mkdir build && cd build
+$ cmake .. && make
+```
+
+#### Run
+
+```shell script
+$ ./ekf input output
+```
+
 ## Simulation results
 
 The results for two data sets with EKF implementation are shown below.

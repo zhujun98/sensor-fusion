@@ -23,6 +23,21 @@ $ mkdir build && cd build
 $ cmake .. && make install
 ```
 
+## Build and run
+
+#### Build
+
+```shell script
+$ mkdir build && cd build
+$ cmake .. && make
+```
+
+#### Run
+
+```shell script
+$ ./ukf input output
+```
+
 ## Simulation results
 
 The results for two data sets with UKF implementation are shown below.

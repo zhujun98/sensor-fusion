@@ -13,41 +13,6 @@
 #include "utilities.h"
 
 
-void checkArguments(int argc, char* argv[]) {
-  std::string usage_instructions = "Usage instructions: ";
-  usage_instructions += argv[0];
-  usage_instructions += " path/to/input.txt output.txt";
-
-  bool has_valid_args = false;
-
-  // make sure the user has provided input and output files
-  if (argc == 1) {
-    std::cerr << usage_instructions << std::endl;
-  } else if (argc == 2) {
-    std::cerr << "Please include an output file.\n" << usage_instructions << std::endl;
-  } else if (argc == 3) {
-    has_valid_args = true;
-  } else if (argc > 3) {
-    std::cerr << "Too many arguments.\n" << usage_instructions << std::endl;
-  }
-
-  if (!has_valid_args) exit(EXIT_FAILURE);
-}
-
-void checkFiles(std::ifstream& in_file, std::string& in_name,
-                 std::ofstream& out_file, std::string& out_name) {
-  if (!in_file.is_open()) {
-    std::cerr << "Cannot open input file: " << in_name << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  if (!out_file.is_open()) {
-    std::cerr << "Cannot open output file: " << out_name << std::endl;
-    exit(EXIT_FAILURE);
-  }
-}
-
-
 //
 // Calculate root mean square error.
 //
@@ -73,15 +38,27 @@ inline Eigen::VectorXd calculateRMSE(const std::vector<Eigen::VectorXd>& estimat
 
 int main(int argc, char* argv[]) {
 
-  checkArguments(argc, argv);
+  std::string usage_instructions = "Usage instructions: ";
+  usage_instructions += argv[0];
+  usage_instructions += " input output";
 
-  std::string in_file_name_ = argv[1];
-  std::ifstream in_file_(in_file_name_.c_str(), std::ifstream::in);
+  if (argc != 3) {
+    std::cerr << usage_instructions << std::endl;
+    exit(EXIT_FAILURE);
+  }
 
-  std::string out_file_name_ = argv[2];
-  std::ofstream out_file_(out_file_name_.c_str(), std::ofstream::out);
+  std::ifstream ifs(std::string(argv[1]).c_str(), std::ifstream::in);
+  std::ofstream ofs(std::string(argv[2]).c_str(), std::ofstream::out);
 
-  checkFiles(in_file_, in_file_name_, out_file_, out_file_name_);
+  if (!ifs.is_open()) {
+    std::cerr << "Failed to open input file!" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  if (!ofs.is_open()) {
+    std::cerr << "Failed to open output file!" << std::endl;
+    exit(EXIT_FAILURE);
+  }
 
   std::vector<MeasurementPackage> m_hist;
   std::vector<GroundTruthPackage> gt_hist;
@@ -91,7 +68,7 @@ int main(int argc, char* argv[]) {
   // prep the measurement packages (each line represents a measurement at a
   // timestamp)
 
-  while (std::getline(in_file_, line)) {
+  while (std::getline(ifs, line)) {
 
     std::string sensor_type;
     MeasurementPackage m_pkg;
@@ -165,29 +142,29 @@ int main(int argc, char* argv[]) {
     fusion_ekf.processMeasurement(m_hist[k]);
 
     // output the estimation
-    out_file_ << fusion_ekf.ekf_.x_(0) << "\t";
-    out_file_ << fusion_ekf.ekf_.x_(1) << "\t";
-    out_file_ << fusion_ekf.ekf_.x_(2) << "\t";
-    out_file_ << fusion_ekf.ekf_.x_(3) << "\t";
+    ofs << fusion_ekf.ekf_.x_(0) << "\t";
+    ofs << fusion_ekf.ekf_.x_(1) << "\t";
+    ofs << fusion_ekf.ekf_.x_(2) << "\t";
+    ofs << fusion_ekf.ekf_.x_(3) << "\t";
 
     // output the measurements
     if (m_hist[k].sensor_type == MeasurementPackage::LIDAR) {
       // output the estimation
-      out_file_ << m_hist[k].values(0) << "\t";
-      out_file_ << m_hist[k].values(1) << "\t";
+      ofs << m_hist[k].values(0) << "\t";
+      ofs << m_hist[k].values(1) << "\t";
     } else if (m_hist[k].sensor_type == MeasurementPackage::RADAR) {
       // output the estimation in the cartesian coordinates
       double rho = m_hist[k].values(0);
       double phi = m_hist[k].values(1);
-      out_file_ << rho * std::cos(phi) << "\t"; // p1_meas
-      out_file_ << rho * std::sin(phi) << "\t"; // ps_meas
+      ofs << rho * std::cos(phi) << "\t"; // p1_meas
+      ofs << rho * std::sin(phi) << "\t"; // ps_meas
     }
 
     // output the ground truth packages
-    out_file_ << gt_hist[k].values(0) << "\t";
-    out_file_ << gt_hist[k].values(1) << "\t";
-    out_file_ << gt_hist[k].values(2) << "\t";
-    out_file_ << gt_hist[k].values(3) << "\n";
+    ofs << gt_hist[k].values(0) << "\t";
+    ofs << gt_hist[k].values(1) << "\t";
+    ofs << gt_hist[k].values(2) << "\t";
+    ofs << gt_hist[k].values(3) << "\n";
 
     estimations.push_back(fusion_ekf.ekf_.x_);
     ground_truth.push_back(gt_hist[k].values);
@@ -197,9 +174,8 @@ int main(int argc, char* argv[]) {
   std::cout << "Estimation accuracy - RMSE:\n" << calculateRMSE(estimations, ground_truth) << std::endl;
 
   // close files
-  if (out_file_.is_open()) out_file_.close();
-
-  if (in_file_.is_open()) in_file_.close();
+  if (ofs.is_open()) ofs.close();
+  if (ifs.is_open()) ifs.close();
 
   return 0;
 }
