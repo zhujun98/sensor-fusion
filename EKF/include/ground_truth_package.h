@@ -10,14 +10,14 @@
 
 class GroundTruthPackage {
 public:
-  long long timestamp_;
+  long long timestamp;
 
   enum SensorType{
     LIDAR,
     RADAR
-  } sensor_type_;
+  } sensor_type;
 
-  Eigen::VectorXd gt_values_;
+  Eigen::VectorXd values;
 
 };
 

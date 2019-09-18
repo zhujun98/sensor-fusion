@@ -83,8 +83,8 @@ int main(int argc, char* argv[]) {
 
   checkFiles(in_file_, in_file_name_, out_file_, out_file_name_);
 
-  std::vector<MeasurementPackage> measurement_pack_list;
-  std::vector<GroundTruthPackage> gt_pack_list;
+  std::vector<MeasurementPackage> m_hist;
+  std::vector<GroundTruthPackage> gt_hist;
 
   std::string line;
 
@@ -94,8 +94,8 @@ int main(int argc, char* argv[]) {
   while (std::getline(in_file_, line)) {
 
     std::string sensor_type;
-    MeasurementPackage meas_package;
-    GroundTruthPackage gt_package;
+    MeasurementPackage m_pkg;
+    GroundTruthPackage gt_pkg;
     std::istringstream iss(line);
     long long timestamp;
 
@@ -104,17 +104,17 @@ int main(int argc, char* argv[]) {
 
     if (sensor_type == "L") {
       // LIDAR measurement
-      meas_package.sensor_type_ = MeasurementPackage::LIDAR;
+      m_pkg.sensor_type = MeasurementPackage::LIDAR;
 
       double x;
       double y;
       iss >> x;
       iss >> y;
-      meas_package.raw_measurements_ = Eigen::VectorXd(2);
-      meas_package.raw_measurements_ << x, y;
+      m_pkg.values = Eigen::VectorXd(2);
+      m_pkg.values << x, y;
     } else if (sensor_type == "R") {
       // RADAR measurement
-      meas_package.sensor_type_ = MeasurementPackage::RADAR;
+      m_pkg.sensor_type = MeasurementPackage::RADAR;
 
       double rho;
       double phi;
@@ -125,18 +125,17 @@ int main(int argc, char* argv[]) {
 
       // Normalize the angle to (-pi, pi]
       phi = utilities::normalizeAngle(phi);
-      meas_package.raw_measurements_ = Eigen::VectorXd(3);
-      meas_package.raw_measurements_ << rho, phi, v_rho;
+      m_pkg.values = Eigen::VectorXd(3);
+      m_pkg.values << rho, phi, v_rho;
     } else {
-      std::cerr << "Unknown sensor type: " << meas_package.sensor_type_
-                << std::endl;
+      std::cerr << "Unknown sensor type: " << m_pkg.sensor_type << std::endl;
       exit(EXIT_FAILURE);
     }
 
     // read the timestamp for both LIDAR and RADAR
     iss >> timestamp;
-    meas_package.timestamp_ = timestamp;
-    measurement_pack_list.push_back(meas_package);
+    m_pkg.timestamp = timestamp;
+    m_hist.push_back(m_pkg);
 
     // read ground truth data to compare later
     double x_gt;
@@ -148,9 +147,9 @@ int main(int argc, char* argv[]) {
     iss >> vx_gt;
     iss >> vy_gt;
 
-    gt_package.gt_values_ = Eigen::VectorXd(4);
-    gt_package.gt_values_ << x_gt, y_gt, vx_gt, vy_gt;
-    gt_pack_list.push_back(gt_package);
+    gt_pkg.values = Eigen::VectorXd(4);
+    gt_pkg.values << x_gt, y_gt, vx_gt, vy_gt;
+    gt_hist.push_back(gt_pkg);
   }
 
   FusionEKF fusion_ekf;
@@ -160,10 +159,10 @@ int main(int argc, char* argv[]) {
   std::vector<Eigen::VectorXd> ground_truth;
 
   //Call the EKF-based fusion
-  std::size_t N = measurement_pack_list.size();
+  std::size_t N = m_hist.size();
   for (std::size_t k = 0; k < N; ++k) {
     // start filtering from the second frame (the speed is unknown in the first frame)
-    fusion_ekf.processMeasurement(measurement_pack_list[k]);
+    fusion_ekf.processMeasurement(m_hist[k]);
 
     // output the estimation
     out_file_ << fusion_ekf.ekf_.x_(0) << "\t";
@@ -172,31 +171,30 @@ int main(int argc, char* argv[]) {
     out_file_ << fusion_ekf.ekf_.x_(3) << "\t";
 
     // output the measurements
-    if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::LIDAR) {
+    if (m_hist[k].sensor_type == MeasurementPackage::LIDAR) {
       // output the estimation
-      out_file_ << measurement_pack_list[k].raw_measurements_(0) << "\t";
-      out_file_ << measurement_pack_list[k].raw_measurements_(1) << "\t";
-    } else if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::RADAR) {
+      out_file_ << m_hist[k].values(0) << "\t";
+      out_file_ << m_hist[k].values(1) << "\t";
+    } else if (m_hist[k].sensor_type == MeasurementPackage::RADAR) {
       // output the estimation in the cartesian coordinates
-      double rho = measurement_pack_list[k].raw_measurements_(0);
-      double phi = measurement_pack_list[k].raw_measurements_(1);
+      double rho = m_hist[k].values(0);
+      double phi = m_hist[k].values(1);
       out_file_ << rho * std::cos(phi) << "\t"; // p1_meas
       out_file_ << rho * std::sin(phi) << "\t"; // ps_meas
     }
 
     // output the ground truth packages
-    out_file_ << gt_pack_list[k].gt_values_(0) << "\t";
-    out_file_ << gt_pack_list[k].gt_values_(1) << "\t";
-    out_file_ << gt_pack_list[k].gt_values_(2) << "\t";
-    out_file_ << gt_pack_list[k].gt_values_(3) << "\n";
+    out_file_ << gt_hist[k].values(0) << "\t";
+    out_file_ << gt_hist[k].values(1) << "\t";
+    out_file_ << gt_hist[k].values(2) << "\t";
+    out_file_ << gt_hist[k].values(3) << "\n";
 
     estimations.push_back(fusion_ekf.ekf_.x_);
-    ground_truth.push_back(gt_pack_list[k].gt_values_);
+    ground_truth.push_back(gt_hist[k].values);
   }
 
   // compute the accuracy (RMSE)
-  std::cout << "Estimation accuracy - RMSE:" << std::endl
-            << calculateRMSE(estimations, ground_truth) << std::endl;
+  std::cout << "Estimation accuracy - RMSE:\n" << calculateRMSE(estimations, ground_truth) << std::endl;
 
   // close files
   if (out_file_.is_open()) out_file_.close();

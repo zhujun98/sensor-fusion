@@ -60,31 +60,31 @@ void FusionEKF::processMeasurement(const MeasurementPackage &measurement_pack) {
 
     ekf_.x_ = Eigen::VectorXd(4);
 
-    if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
+    if (measurement_pack.sensor_type == MeasurementPackage::RADAR) {
       Eigen::VectorXd x_polar(3);
-      x_polar << measurement_pack.raw_measurements_[0],
-                 measurement_pack.raw_measurements_[1],
-                 measurement_pack.raw_measurements_[2];
+      x_polar << measurement_pack.values[0],
+                 measurement_pack.values[1],
+                 measurement_pack.values[2];
 
       // Convert positions and velocities from polar to cartesian coordinates.
       ekf_.x_ = utilities::polar2Cartesian(x_polar);
-    } else if (measurement_pack.sensor_type_ == MeasurementPackage::LIDAR) {
-      ekf_.x_ << measurement_pack.raw_measurements_[0],
-                 measurement_pack.raw_measurements_[1],
+    } else if (measurement_pack.sensor_type == MeasurementPackage::LIDAR) {
+      ekf_.x_ << measurement_pack.values[0],
+                 measurement_pack.values[1],
                                                      0,
                                                      0;
     } else {
-      std::cerr << "Unknown sensor_type_: " << measurement_pack.sensor_type_ << std::endl;
+      std::cerr << "Unknown sensor_type: " << measurement_pack.sensor_type << std::endl;
       exit(EXIT_FAILURE);
     }
 
-    time_us_ = measurement_pack.timestamp_;
+    time_us_ = measurement_pack.timestamp;
     is_initialized_ = true;
     return;
   }
 
   // Compute the time elapsed between the current and previous measurements
-  double dt = (measurement_pack.timestamp_ - time_us_) / 1000000.0;  // In second
+  double dt = (measurement_pack.timestamp - time_us_) / 1000000.0;  // In second
 
   // Update the state transition matrix f according to the new elapsed time.
   ekf_.f_(0, 2) = dt;
@@ -103,13 +103,13 @@ void FusionEKF::processMeasurement(const MeasurementPackage &measurement_pack) {
                             0, dt_3/2*noise_ay_,                0,   dt_2*noise_ay_;
 
   // Prediction and Measurement updating
-  if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR && use_radar_) {
-    ekf_.updateEKF(measurement_pack.raw_measurements_, r_radar_);
-  } else if (measurement_pack.sensor_type_ == MeasurementPackage::LIDAR && use_lidar_) {
-    ekf_.update(measurement_pack.raw_measurements_, r_lidar_);
+  if (measurement_pack.sensor_type == MeasurementPackage::RADAR && use_radar_) {
+    ekf_.updateEKF(measurement_pack.values, r_radar_);
+  } else if (measurement_pack.sensor_type == MeasurementPackage::LIDAR && use_lidar_) {
+    ekf_.update(measurement_pack.values, r_lidar_);
   } else return;
 
   // Update time stamp
-  time_us_ = measurement_pack.timestamp_;
+  time_us_ = measurement_pack.timestamp;
 
 }

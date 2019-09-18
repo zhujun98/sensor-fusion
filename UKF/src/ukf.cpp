@@ -88,28 +88,28 @@ void UKF::processMeasurement(const MeasurementPackage &ms_pack) {
   // Initialization
   if (! is_initialized_) {
 
-    if (ms_pack.sensor_type_ == MeasurementPackage::RADAR) {
-      const double rho = ms_pack.raw_measurements_[0];
-      const double phi = ms_pack.raw_measurements_[1];
-      // double v_rho = ms_pack.raw_measurements_[2];
+    if (ms_pack.sensor_type == MeasurementPackage::RADAR) {
+      const double rho = ms_pack.values[0];
+      const double phi = ms_pack.values[1];
+      // double v_rho = ms_pack.values[2];
 
       // Convert positions and velocities from polar to CTRV coordinates.
       const double p_x = rho * std::cos(phi);
       const double p_y = rho * std::sin(phi);
       x_ << p_x, p_y, 0.0, 0.0, 0.0;
 
-    } else if (ms_pack.sensor_type_ == MeasurementPackage::LIDAR) {
-      const double p_x = ms_pack.raw_measurements_[0];
-      const double p_y = ms_pack.raw_measurements_[1];
+    } else if (ms_pack.sensor_type == MeasurementPackage::LIDAR) {
+      const double p_x = ms_pack.values[0];
+      const double p_y = ms_pack.values[1];
       x_ << p_x, p_y, 0.0, 0.0, 0.0;
 
     } else {
-      std::cerr << "Unknown sensor_type_: " << ms_pack.sensor_type_
+      std::cerr << "Unknown sensor_type: " << ms_pack.sensor_type
                 << std::endl;
       exit(EXIT_FAILURE);
     }
 
-    time_us_ = ms_pack.timestamp_;
+    time_us_ = ms_pack.timestamp;
 
     Xsig_pred_ = generateSigmaPoints(x_, P_, n_aug_, lambda_);
 
@@ -118,18 +118,18 @@ void UKF::processMeasurement(const MeasurementPackage &ms_pack) {
     return;
   }
 
-  const double dt = (ms_pack.timestamp_ - time_us_)/1000000.0;
+  const double dt = (ms_pack.timestamp - time_us_)/1000000.0;
 
   // Measurement update
-  if (ms_pack.sensor_type_ == MeasurementPackage::RADAR && use_radar_) {
+  if (ms_pack.sensor_type == MeasurementPackage::RADAR && use_radar_) {
     updateRadar(ms_pack, dt);
-  } else if (ms_pack.sensor_type_ == MeasurementPackage::LIDAR && use_lidar_) {
+  } else if (ms_pack.sensor_type == MeasurementPackage::LIDAR && use_lidar_) {
     updateLidar(ms_pack, dt);
   } else return;
 
   // The latest time update should be put here since the update may
   // be skipped, e.g. for the RADAR measurement.
-  time_us_ = ms_pack.timestamp_;
+  time_us_ = ms_pack.timestamp;
 }
 
 void UKF::prediction(double delta_t) {
@@ -286,16 +286,16 @@ void UKF::measurementUpdate(const MeasurementPackage &ms_pack,
   S.fill(0.0);
   for (int i=0; i< 2*n_aug_+1; ++i) {
     Eigen::VectorXd z_diff = Zsig.col(i) - z_pred;
-    if (ms_pack.sensor_type_ == MeasurementPackage::RADAR) {
+    if (ms_pack.sensor_type == MeasurementPackage::RADAR) {
       z_diff(1) = utilities::normalizeAngle(z_diff(1));
     }
 
     S += weights_(i)*z_diff*z_diff.transpose();
   }
 
-  if (ms_pack.sensor_type_ == MeasurementPackage::RADAR) {
+  if (ms_pack.sensor_type == MeasurementPackage::RADAR) {
     S += r_radar_;
-  } else if (ms_pack.sensor_type_ == MeasurementPackage::LIDAR){
+  } else if (ms_pack.sensor_type == MeasurementPackage::LIDAR){
     S += r_lidar_;
   }
 
@@ -306,7 +306,7 @@ void UKF::measurementUpdate(const MeasurementPackage &ms_pack,
   for (int i=0; i<2*n_aug_+1; i++) {
     //residual
     Eigen::VectorXd z_diff = Zsig.col(i) - z_pred;
-    if (ms_pack.sensor_type_ == MeasurementPackage::RADAR) {
+    if (ms_pack.sensor_type == MeasurementPackage::RADAR) {
       z_diff(1) = utilities::normalizeAngle(z_diff(1));
     }
 
@@ -322,8 +322,8 @@ void UKF::measurementUpdate(const MeasurementPackage &ms_pack,
   Eigen::MatrixXd K = Tc*Si;
 
   //residual
-  Eigen::VectorXd z_diff = ms_pack.raw_measurements_ - z_pred;
-  if (ms_pack.sensor_type_ == MeasurementPackage::RADAR) {
+  Eigen::VectorXd z_diff = ms_pack.values - z_pred;
+  if (ms_pack.sensor_type == MeasurementPackage::RADAR) {
     z_diff(1) = utilities::normalizeAngle(z_diff(1));
   }
 
@@ -332,10 +332,10 @@ void UKF::measurementUpdate(const MeasurementPackage &ms_pack,
   P_ -= K*S*K.transpose();
 
   // Calculate the normalized innovation squared()
-  if (ms_pack.sensor_type_ == MeasurementPackage::RADAR) {
-    NIS_radar_ = z_diff.transpose()*Si*z_diff;
-  } else if (ms_pack.sensor_type_ == MeasurementPackage::LIDAR){
-    NIS_lidar_ = z_diff.transpose()*Si*z_diff;
+  if (ms_pack.sensor_type == MeasurementPackage::RADAR) {
+    nis_radar_ = z_diff.transpose()*Si*z_diff;
+  } else if (ms_pack.sensor_type == MeasurementPackage::LIDAR){
+    nis_lidar_ = z_diff.transpose()*Si*z_diff;
   }
 
 }

@@ -75,14 +75,14 @@ class UKF {
 
   //
   // Updates the state and the state covariance matrix using a lidar measurement.
-  // @param meas_package: Measurement
+  // @param m_pkg: Measurement
   // @param delta_t: Time step in second
   //
   void updateLidar(const MeasurementPackage &ms_pack, double delta_t);
 
   //
   // Updates the state and the state covariance matrix using a radar measurement.
-  // @param meas_package: Measurement
+  // @param m_pkg: Measurement
   // @param delta_t: Time step in second
   //
   void updateRadar(const MeasurementPackage &ms_pack, double delta_t);
@@ -101,7 +101,7 @@ class UKF {
 
   //
   // Kalman filter measurement update.
-  // @param meas_package: Measurement
+  // @param m_pkg: Measurement
   // @param Zsig: Measurement sigma points matrix
   // @param n_z: Length of the measurement vector
   void measurementUpdate(const MeasurementPackage &ms_pack,
@@ -114,10 +114,10 @@ public:
   Eigen::VectorXd x_;
 
   // the current NIS (normalized innovation squared) for radar
-  double NIS_radar_;
+  double nis_radar_;
 
   // the current NIS for lidar
-  double NIS_lidar_;
+  double nis_lidar_;
 
   UKF();
 
