@@ -8,6 +8,7 @@
 \usepackage{amsmath, amsthm, amssymb, amsfonts}
 \usepackage{graphicx}
 \usepackage{grffile}
+\usepackage{enumitem}
 
 \usepackage{geometry}
 \geometry{
@@ -60,18 +61,18 @@
 The Kalman filter estimates a process by using a feedback control. The filter predicts the system state at some time and then obtains feedback based on measurement. The time update (prediction) function of the basic Kalman filter is governed by the linear stochastic equation
 %
 \begin{equation}
-	\mathbf{x}_{k} = \mathbf{F}\mathbf{x}_{k - 1} + \mathbf{w},
+	\mathbf{\hat{x}}_{k} = \mathbf{F}\mathbf{\hat{x}}_{k - 1} + \mathbf{w},
 \end{equation}
 %
-where \(\mathbf{x}_{k} \in \mathfrak{R}^{n}\) is the state vector and \(\mathbf{w}\sim N( 0,\mathbf{Q})\) is the process noise with \(\mathbf{Q}\) the covariance matrix. The measurement function is written as:
+where \(\mathbf{\hat{x}}_{k} \in \mathfrak{R}^{n}\) is the estimated state vector for \(\mathbf{x_k}\) and \(\mathbf{w}\sim N( 0,\mathbf{Q})\) is the process noise with \(\mathbf{Q}\) the covariance matrix. The measurement function is written as:
 %
 \begin{equation}
-	\mathbf{z}_{\mathbf{k}} = \mathbf{H}\mathbf{x}_{k} + \mathbf{v},
+	\mathbf{z}_{\mathbf{k}} = \mathbf{H}\mathbf{\hat{x}}_{k} + \mathbf{v},
 \end{equation}
 %
 where \(\mathbf{z}_{k} \in \mathfrak{R}^{m}\) is the measurement vector and \(\mathbf{v}\sim N( 0,\mathbf{R})\) is the process noise with \(\mathbf{R}\) the covariance matrix.
 
-The equations used in the Kalman filter are listed in Table~\ref{tab:table-KF} \cite{Welch}. Here \(\mathbf{P}_{k}^{-}\) and \(\mathbf{P}_{k}\) are the priori and posteriori error covariance matrix, respectively, \(\mathbf{z}_{k} - \mathbf{H}\mathbf{x}_{k}^{-}\) is called the measurement innovation, and \(\mathbf{K}_{k}\) is chosen to minimize the posteriori error covariance.
+The equations used in the Kalman filter are listed in Table~\ref{tab:table-KF} \cite{Welch}. Here \(\mathbf{P}_{k}^{-}\) and \(\mathbf{P}_{k}\) are the priori and posteriori error covariance matrix, respectively, \(\mathbf{z}_{k} - \mathbf{H}\mathbf{\hat{x}}_{k}^{-}\) is called the \textbf{\textit{measurement innovation}}, and \(\mathbf{K}_{k}\), the so-called \textbf{\textit{Kalman gain}}, is chosen to minimize the posteriori error covariance.
 
 \begin{table}[h]
 	\renewcommand{\arraystretch}{1.5}
@@ -83,22 +84,22 @@ The equations used in the Kalman filter are listed in Table~\ref{tab:table-KF} \
 		Time update (predict) & Measurement update (correct) \\
 		\hline
 		$\begin{aligned}[t]
-			\mathbf{x}_{k}^{-} &= \mathbf{F}\mathbf{x}_{k - 1} \\
+			\mathbf{\hat{x}}_{k}^{-} &= \mathbf{F}\mathbf{\hat{x}}_{k - 1} \\
 			\mathbf{P}_{k}^{-} &= \mathbf{F}\mathbf{P}_{k - 1}\mathbf{F}^{\mathbf{T}} + \mathbf{Q}
 		\end{aligned}$ &
 		$\begin{aligned}[t]
 			\mathbf{K}_{k} &= \mathbf{P}_{k}^{-}\mathbf{H}^{\mathbf{T}}( \mathbf{H}\mathbf{P}_{k}^{-}\mathbf{H}^{\mathbf{T}}\mathbf{+ R})^{- 1} \\
-			\mathbf{x}_{k} &= \mathbf{x}_{k}^{-} + \mathbf{K}_{k}( \mathbf{z}_{k} - \mathbf{H}\mathbf{x}_{k}^{-}) \\
+			\mathbf{\hat{x}}_{k} &= \mathbf{\hat{x}}_{k}^{-} + \mathbf{K}_{k}( \mathbf{z}_{k} - \mathbf{H}\mathbf{\hat{x}}_{k}^{-}) \\
 			\mathbf{P}_{k} &= ( \mathbf{I} - \mathbf{K}_{k}\mathbf{H})\mathbf{P}_{k}^{-}
 		\end{aligned}$ \\
 		\hline
 	\end{tabular}
 \end{table}
 
-In the LIDAR measurement, the state vector \(\mathbf{x}_{k}\) is given by
+In the LIDAR measurement, the state vector \(\mathbf{x}\) is given by
 %
 \begin{equation}
-	\mathbf{x}_{k} = \begin{bmatrix} p_{x} & p_{y} & \dot{p}_{x} & \dot{p}_{y}\end{bmatrix}^{T}.
+	\mathbf{x} = \begin{bmatrix} p_{x} & p_{y} & \dot{p}_{x} & \dot{p}_{y}\end{bmatrix}^{T}.
 \end{equation}
 %
 Assuming a linear motion, we have
@@ -130,12 +131,12 @@ where \(\Delta t\) is the time step. The measurement vector is \(\mathbf{z}_{k} 
 The extended Kalman filter is used to solve the problem in which the state function
 %
 \begin{equation}
-	\mathbf{x}_{k} = \mathbf{f}( \mathbf{x}_{k - 1},\ \mathbf{w}_{k - 1})
+	\mathbf{\hat{x}}_{k} = \mathbf{f}( \mathbf{\hat{x}}_{k - 1},\ \mathbf{w}_{k - 1})
 \end{equation}
 and/or the measurement function
 %
 \begin{equation}
-	\mathbf{z}_{k} = \mathbf{h}( \mathbf{x}_{k},\mathbf{v}_{k}).
+	\mathbf{z}_{k} = \mathbf{h}( \mathbf{\hat{x}}_{k},\mathbf{v}_{k}).
 \end{equation}
 %
 are nonlinear.
@@ -177,12 +178,12 @@ longer normal after the nonlinear transformation.
 		Time update (predict) & Measurement update (correct) \\
 		\hline
 		$\begin{aligned}[t]
-			\mathbf{x}_{k}^{-} &= \mathbf{f}( \mathbf{x}_{k - 1}, \mathbf{0}) \\
+			\mathbf{\hat{x}}_{k}^{-} &= \mathbf{f}( \mathbf{\hat{x}}_{k - 1}, \mathbf{0}) \\
 			\mathbf{P}_{k}^{-} &= \mathbf{F}\mathbf{P}_{k - 1}\mathbf{F}^{\mathbf{T}}\mathbf{+}\mathbf{W}_{\mathbf{k}}\mathbf{Q}_{k-1}\mathbf{W}_{k}^{T}
 		\end{aligned}$ &
 		$\begin{aligned}[t]
 			\mathbf{K}_{k} &= \mathbf{P}_{k}^{-}\mathbf{H}^{\mathbf{T}}( \mathbf{H}\mathbf{P}_{k}^{-}\mathbf{H}^{\mathbf{T}}\mathbf{+}\mathbf{V}_{k}\mathbf{R}_{k}\mathbf{V}_{k}^{T})^{- 1} \\
-			\mathbf{x}_{k} &= \mathbf{x}_{k}^{-} + \mathbf{K}_{k}( \mathbf{z}_{k} - \mathbf{h}(\mathbf{x}_{k}^{-},\mathbf{0})) \\
+			\mathbf{\hat{x}}_{k} &= \mathbf{\hat{x}}_{k}^{-} + \mathbf{K}_{k}( \mathbf{z}_{k} - \mathbf{h}(\mathbf{\hat{x}}_{k}^{-},\mathbf{0})) \\
 			\mathbf{P}_{k} &= ( \mathbf{I} - \mathbf{K}_{k}\mathbf{H})\mathbf{P}_{k}^{-}
 		\end{aligned}$ \\
 		\hline
@@ -343,7 +344,7 @@ respectively. Since the CTRV model is use, we have $\dot{v}=0$ and $\ddot{\psi}=
 
 \begin{figure}[h]
 	\center
-	\includegraphics[scale=0.5]{./misc/{CTRV model}.png}
+	\includegraphics[scale=0.5]{./misc/CTRV_model.png}
 	\caption{Illustration of the CTRV model}
 	\label{fig:ctrv}
 \end{figure}
@@ -387,6 +388,46 @@ and
 \end{equation}
 %
 During the measurement update, equations \ref{eq:UKF_mea_add0} and \ref{eq:UKF_mea_add1} can be used.
+
+%
+%%%-------------------------------------------------------------------------%%%
+%%%-------------------------------------------------------------------------%%%
+%%%-------------------------------------------------------------------------%%%
+
+\section{Real-time consistency tests}
+
+The estimation errors of a state estimator (filter) based on a finite number of samples (measurements) should be consistent with their theoretical statistical properties: \cite{Shalom}
+
+\begin{enumerate}
+	\item Have mean zero (i.e., the estimates are unbiased).
+	\item Have covariance matrix as calculated by the filter.
+\end{enumerate}
+
+As a result, the consistency criteria of a filter are as follows:
+
+\begin{enumerate}[label=(\alph*)]
+	\item The state errors should be acceptable as zero mean and have magnitude commensurate with the state covariance as yielded by the filter.
+	\item \textbf{The innovations should also have the same property}.
+	\item \textbf{The innovations should be acceptable as white}.
+\end{enumerate}
+
+The last two criteria are the only ones that can be tested in applications with real data. The first criterion, which is really the most important one, can be tested only in simulations with the \textbf{\textit{normalized estimation error squared (NEES)}}
+
+\begin{equation}
+	\epsilon_{x,k}=(\mathbf{x}_k - \mathbf{\hat{x}}_k)^{T}\mathbf{P}^{-1}_{k}(\mathbf{x}_k - \mathbf{\hat{x}}_k).
+\end{equation}
+where \(\mathbf{P}_k\) is the posteriori error covariance matrix. Under the hypothesis that the filter is consistent, \(\epsilon_{x,k}\) should have a \(\chi^2\) distribution with \(n\) \((n_x)\) degrees of freedom.
+
+Criterion (b) can be tested with the \textbf{\textit{time-average normalized innovation squared (NIS)}} statistic. For the basic Kalman filter, it is given by
+
+\begin{equation}
+  \epsilon_{z,k}=(\mathbf{z}_{k} - \mathbf{H}\mathbf{x}_{k}^{-})^{\mathbf{T}}S_k^{- 1}(\mathbf{z}_{k} - \mathbf{H}\mathbf{x}_{k}^{-}).
+\end{equation}
+where
+\begin{equation}
+	S_k=\mathbf{H}  \mathbf{P}_{k}^{-}\mathbf{H}^{\mathbf{T}}\mathbf{+ R}
+\end{equation}
+Note that \(S_k\) also appears on the right-hand side of the equation of calculating the Kalman gain. Under the hypothesis that the filter is consistent, \(\epsilon_{z,k}\) should have a \(\chi^2\) distribution with \(m\) \((n_z)\) degrees of freedom.
 %
 %%%-------------------------------------------------------------------------%%%
 %%%-------------------------------------------------------------------------%%%
@@ -410,8 +451,13 @@ ACM, Inc. 2001.
 
 \bibitem{Wan} 
 Eric A. Wan and Rudolph van der Merwe, 
-\textit{The uncented Kalman filter}. 
-Kalman filtering and neural networks, John Wiley \& Sons, Inc., 2002.
+\textit{Kalman filtering and neural networks}. p.221, John Wiley \& Sons, Inc., 2002.
+
+\bibitem{Shalom}
+Yaakov Bar-Shalom, X. Rong Li, Thiagalingam Kirubarajan,
+\textit{Estimation with Applications to Tracking and Navigation: Theory, Algorithms and Software}. John Wiley \& Sons, Inc., 2001.
+
+
 
 \end{thebibliography}
 

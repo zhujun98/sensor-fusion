@@ -19,13 +19,12 @@ Eigen::VectorXd calculateRMSE(
     const std::vector<Eigen::VectorXd> &estimations,
     const std::vector<Eigen::VectorXd> &ground_truth) {
 
-  Eigen::VectorXd rmse(4);
-  rmse << 0, 0, 0, 0;
+  Eigen::RowVector4d rmse {0, 0, 0, 0};
 
   for (std::size_t i=0; i != estimations.size(); ++i) {
     Eigen::VectorXd residual = estimations[i] - ground_truth[i];
 
-    residual = residual.array()*residual.array();
+    residual = residual.array() * residual.array();
 
     rmse += residual;
   }
@@ -61,16 +60,14 @@ int main(int argc, char* argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  //
-  // Set Measurements
-  //
   std::vector<MeasurementPackage> m_hist;
   std::vector<GroundTruthPackage> gt_hist;
 
   std::string line;
 
-  // prep the measurement packages (each line represents a measurement at a
-  // timestamp)
+  // prepare the measurement packages (each line represents a measurement
+  // at a timestamp)
+
   while (getline(ifs, line)) {
     std::string sensor_type;
     MeasurementPackage m_pkg;
@@ -130,85 +127,74 @@ int main(int argc, char* argv[]) {
     gt_hist.push_back(gt_pkg);
   }
 
-  // Create a UKF instance
+  // process data
+
   UKF ukf;
 
-  // used to compute the RMSE later
-  std::vector<Eigen::VectorXd> estimations;
-  std::vector<Eigen::VectorXd> ground_truth;
+  std::vector<Eigen::VectorXd> ret; // estimated values
+  std::vector<Eigen::VectorXd> gt; // ground truth values
 
-  // start filtering from the second frame (the speed is unknown in the first frame)
+  // column names in the output file
+  ofs << "sensor_type\tpx\tpy\tv\tyaw\tyaw_rate\tNIS\tpx_m\tpy_m\tpx_gt\tpy_gt\tvx_gt\tvy_gt\ttimestamp\n";
 
-  size_t number_of_measurements = m_hist.size();
+  for (size_t k = 0; k < m_hist.size(); ++k) {
 
-  // column names for output file
-  ofs << "px" << "\t";
-  ofs << "py" << "\t";
-  ofs << "v" << "\t";
-  ofs << "yaw" << "\t";
-  ofs << "yaw_rate" << "\t";
-  ofs << "NIS" << "\n";
-  ofs << "px_m" << "\t";
-  ofs << "py_m" << "\t";
-  ofs << "px_gt" << "\t";
-  ofs << "py_gt" << "\t";
-  ofs << "vx_gt" << "\t";
-  ofs << "vy_gt" << "\t";
-
-  for (size_t k = 0; k < number_of_measurements; ++k) {
-    // Call the UKF-based fusion
     ukf.processMeasurement(m_hist[k]);
 
-    // output the estimation
+    // dump the sensor type
+    if (m_hist[k].sensor_type == MeasurementPackage::LIDAR) {
+      ofs << "L\t";
+    } else if (m_hist[k].sensor_type == MeasurementPackage::RADAR) {
+      ofs << "R\t";
+    }
+
+    // dump the estimations
     ofs << ukf.x_(0) << "\t"; // estimated x
     ofs << ukf.x_(1) << "\t"; // estimated y
     ofs << ukf.x_(2) << "\t"; // estimated v
     ofs << ukf.x_(3) << "\t"; // estimated yaw
     ofs << ukf.x_(4) << "\t"; // estimated yaw rate
 
-    // output the measurements
+    // dump the NIS values
     if (m_hist[k].sensor_type == MeasurementPackage::LIDAR) {
-      // output the estimation
+      ofs << ukf.nis_lidar_ << "\t";
+    } else if (m_hist[k].sensor_type == MeasurementPackage::RADAR) {
+      ofs << ukf.nis_radar_ << "\t";
+    }
 
+    // dump the measurements
+    if (m_hist[k].sensor_type == MeasurementPackage::LIDAR) {
       ofs << m_hist[k].values(0) << "\t";
       ofs << m_hist[k].values(1) << "\t";
     } else if (m_hist[k].sensor_type == MeasurementPackage::RADAR) {
-      // output the estimation in the cartesian coordinates
       double ro = m_hist[k].values(0);
       double phi = m_hist[k].values(1);
       ofs << ro * cos(phi) << "\t";
       ofs << ro * sin(phi) << "\t";
     }
 
-    // output the ground truth packages
+    // dump the ground truth values
     ofs << gt_hist[k].values(0) << "\t";
     ofs << gt_hist[k].values(1) << "\t";
     ofs << gt_hist[k].values(2) << "\t";
     ofs << gt_hist[k].values(3) << "\t";
 
-    // output the NIS values
-    if (m_hist[k].sensor_type == MeasurementPackage::LIDAR) {
-      ofs << ukf.nis_lidar_ << "\t" << "L" << "\n";
-    } else if (m_hist[k].sensor_type == MeasurementPackage::RADAR) {
-      ofs << ukf.nis_radar_ << "\t" << "R" << "\n";
-    }
+    ofs << m_hist[k].timestamp << "\n";
 
-    // convert ukf x vector to cartesian to compare to ground truth
-    Eigen::VectorXd ukf_x_cartesian_ = Eigen::VectorXd(4);
-
-    double x_estimate_ = ukf.x_(0);
-    double y_estimate_ = ukf.x_(1);
-    double vx_estimate_ = ukf.x_(2) * std::cos(ukf.x_(3));
-    double vy_estimate_ = ukf.x_(2) * std::sin(ukf.x_(3));
+    // convert ukf x vector to cartesian so as to compare with ground truth
+    Eigen::VectorXd x_cartesian = Eigen::VectorXd(4);
+    x_cartesian << ukf.x_(0),
+                   ukf.x_(1),
+                   ukf.x_(2) * std::cos(ukf.x_(3)),
+                   ukf.x_(2) * std::sin(ukf.x_(3));
     
-    ukf_x_cartesian_ << x_estimate_, y_estimate_, vx_estimate_, vy_estimate_;
-    
-    estimations.push_back(ukf_x_cartesian_);
-    ground_truth.push_back(gt_hist[k].values);
+    ret.push_back(x_cartesian);
+    gt.push_back(gt_hist[k].values);
   }
 
-  // compute the accuracy (RMSE)
-  std::cout << "Accuracy - RMSE:\n" << calculateRMSE(estimations, ground_truth) << std::endl;
+  Eigen::IOFormat CommaInitFmt(Eigen::StreamPrecision, Eigen::DontAlignCols,
+                               ", ", ", ", "", "", " << ", "");
+  std::cout << "RMSE" << calculateRMSE(ret, gt).format(CommaInitFmt) << std::endl;
 
   // close files
   if (ofs.is_open()) ofs.close();
