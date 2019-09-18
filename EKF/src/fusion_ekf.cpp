@@ -19,31 +19,31 @@ FusionEKF::FusionEKF() {
   //state covariance matrix
   ekf_.p_ = Eigen::MatrixXd(4, 4);
   ekf_.p_ << 1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1;
+             0, 1, 0, 0,
+             0, 0, 1, 0,
+             0, 0, 0, 1;
 
   //the initial transition matrix F_
   ekf_.f_ = Eigen::MatrixXd(4, 4);
   ekf_.f_ << 1, 0, 1, 0,
-            0, 1, 0, 1,
-            0, 0, 1, 0,
-            0, 0, 0, 1;
+             0, 1, 0, 1,
+             0, 0, 1, 0,
+             0, 0, 0, 1;
 
   //measurement matrix for the basic Kalman fiter
   ekf_.h_ = Eigen::MatrixXd(2, 4);
   ekf_.h_ << 1, 0, 0, 0,
-            0, 1, 0, 0;
+             0, 1, 0, 0;
 
   //measurement covariance matrices
   r_lidar_ = Eigen::MatrixXd(2, 2);
-  r_lidar_ << 0.0225, 0,
-              0, 0.0225;
+  r_lidar_ << 0.0225,      0,
+                   0, 0.0225;
 
   r_radar_ = Eigen::MatrixXd(3, 3);
-  r_radar_ << 0.09, 0, 0,
-              0, 0.0009, 0,
-              0, 0, 0.09;
+  r_radar_ << 0.09,      0,    0,
+                 0, 0.0009,    0,
+                 0,      0, 0.09;
 
   //set the acceleration noise components
   noise_ax_ = 9.0;
@@ -91,16 +91,16 @@ void FusionEKF::processMeasurement(const MeasurementPackage &measurement_pack) {
   ekf_.f_(1, 3) = dt;
 
   // Update the process noise covariance matrix.
-  double dt_2 = dt*dt;
-  double dt_3 = dt_2*dt;
-  double dt_4 = dt_3*dt;
+  double dt_2 = dt * dt;
+  double dt_3 = dt_2 * dt;
+  double dt_4 = dt_3 * dt;
 
   ekf_.q_ = Eigen::MatrixXd(4, 4);
 
-  ekf_.q_ << dt_4/4*noise_ax_,                0, dt_3/2*noise_ax_,                0,
-                            0, dt_4/4*noise_ay_,                0, dt_3/2*noise_ay_,
-             dt_3/2*noise_ax_,                0,   dt_2*noise_ax_,                0,
-                            0, dt_3/2*noise_ay_,                0,   dt_2*noise_ay_;
+  ekf_.q_ << 0.25 * dt_4 * noise_ax_,                       0, 0.5 * dt_3 * noise_ax_,                      0,
+                                   0, 0.25 * dt_4 * noise_ay_,                      0, 0.5 * dt_3 * noise_ay_,
+              0.5 * dt_3 * noise_ax_,                       0,       dt_2 * noise_ax_,                      0,
+                                   0,  0.5 * dt_3 * noise_ay_,                      0,       dt_2 * noise_ay_;
 
   // Prediction and Measurement updating
   if (measurement_pack.sensor_type == MeasurementPackage::RADAR && use_radar_) {

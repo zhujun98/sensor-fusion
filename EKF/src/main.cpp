@@ -65,8 +65,8 @@ int main(int argc, char* argv[]) {
 
   std::string line;
 
-  // prep the measurement packages (each line represents a measurement at a
-  // timestamp)
+  // prepare the measurement packages (each line represents a measurement
+  // at a timestamp)
 
   while (std::getline(ifs, line)) {
 
@@ -129,25 +129,34 @@ int main(int argc, char* argv[]) {
     gt_hist.push_back(gt_pkg);
   }
 
+  // process data
+
   FusionEKF fusion_ekf;
 
-  // used to compute the RMSE later
-  std::vector<Eigen::VectorXd> estimations;
-  std::vector<Eigen::VectorXd> ground_truth;
+  std::vector<Eigen::VectorXd> ret; // estimated values
+  std::vector<Eigen::VectorXd> gt; // ground truth values
 
-  //Call the EKF-based fusion
-  std::size_t N = m_hist.size();
-  for (std::size_t k = 0; k < N; ++k) {
-    // start filtering from the second frame (the speed is unknown in the first frame)
+  // column names in the output file
+  ofs <<"sensor_type\tpx\tpy\tvx\tvy\tpx_m\tpy_m\tpx_gt\tpy_gt\tvx_gt\tvy_gt\ttimestamp\n";
+
+  for (std::size_t k = 0; k < m_hist.size(); ++k) {
+
     fusion_ekf.processMeasurement(m_hist[k]);
 
-    // output the estimation
+    // dump the sensor type
+    if (m_hist[k].sensor_type == MeasurementPackage::LIDAR) {
+      ofs << "L\t";
+    } else if (m_hist[k].sensor_type == MeasurementPackage::RADAR) {
+      ofs << "R\t";
+    }
+
+    // dump the estimations
     ofs << fusion_ekf.ekf_.x_(0) << "\t";
     ofs << fusion_ekf.ekf_.x_(1) << "\t";
     ofs << fusion_ekf.ekf_.x_(2) << "\t";
     ofs << fusion_ekf.ekf_.x_(3) << "\t";
 
-    // output the measurements
+    // dump the measurements
     if (m_hist[k].sensor_type == MeasurementPackage::LIDAR) {
       // output the estimation
       ofs << m_hist[k].values(0) << "\t";
@@ -160,18 +169,22 @@ int main(int argc, char* argv[]) {
       ofs << rho * std::sin(phi) << "\t"; // ps_meas
     }
 
-    // output the ground truth packages
+    // dump the ground truth values
     ofs << gt_hist[k].values(0) << "\t";
     ofs << gt_hist[k].values(1) << "\t";
     ofs << gt_hist[k].values(2) << "\t";
-    ofs << gt_hist[k].values(3) << "\n";
+    ofs << gt_hist[k].values(3) << "\t";
 
-    estimations.push_back(fusion_ekf.ekf_.x_);
-    ground_truth.push_back(gt_hist[k].values);
+    // dump the timestamp
+    ofs << m_hist[k].timestamp << "\n";
+
+    ret.push_back(fusion_ekf.ekf_.x_);
+    gt.push_back(gt_hist[k].values);
   }
 
-  // compute the accuracy (RMSE)
-  std::cout << "Estimation accuracy - RMSE:\n" << calculateRMSE(estimations, ground_truth) << std::endl;
+  Eigen::IOFormat CommaInitFmt(Eigen::StreamPrecision, Eigen::DontAlignCols,
+                               ", ", ", ", "", "", " << ", "");
+  std::cout << "RMSE" << calculateRMSE(ret, gt).format(CommaInitFmt) << std::endl;
 
   // close files
   if (ofs.is_open()) ofs.close();
