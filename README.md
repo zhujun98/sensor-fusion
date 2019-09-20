@@ -20,3 +20,5 @@ is summarized [here](./KalmanFilter.pdf)
 ### [2] [Uncented Kalman Filter](./UKF) (LIDAR and RADAR)
 
 ![](./misc/UKF_show.png)
+
+### [3] [LIDAR Obstacle Detection](./SFND_Lidar_Obstacle_Detection)
