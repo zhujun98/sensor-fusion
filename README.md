@@ -13,10 +13,10 @@ is summarized [here](./KalmanFilter.pdf)
 
 ![alt text](./misc/flow_chart.png)
 
-## Lidar and Radar Data Fusion with Extended Kalman Filter
+### [1] [Extended Kalman Filter](./EKF) (LIDAR and RADAR)
 
-Details can be found [here](./EKF).
+![](./misc/EKF_show.png)
 
-## Lidar and Radar Data Fusion with Uncented Kalman Filter
+### [2] [Uncented Kalman Filter](./UKF) (LIDAR and RADAR)
 
-Details can be found [here](./UKF).
+![](./misc/UKF_show.png)
