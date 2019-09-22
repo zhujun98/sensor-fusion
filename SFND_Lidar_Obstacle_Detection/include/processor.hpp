@@ -1,15 +1,29 @@
-#include "processPointClouds.h"
+/*
+ * Author: Jun Zhu, zhujun981661@gmail.com
+ */
+
+#ifndef LIDAR_OBSTACLE_DETECTION_FILTERCLOUD_HPP
+#define LIDAR_OBSTACLE_DETECTION_FILTERCLOUD_HPP
+
+#include <pcl/io/pcd_io.h>
+#include <pcl/common/common.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/filters/crop_box.h>
+#include <pcl/kdtree/kdtree.h>
+#include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/segmentation/extract_clusters.h>
+#include <pcl/common/transforms.h>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <ctime>
+#include <chrono>
+#include "box.h"
 
 
 template<typename PointT>
-void ProcessPointClouds<PointT>::numPoints(typename pcl::PointCloud<PointT>::Ptr cloud)
-{
-  std::cout << cloud->points.size() << std::endl;
-}
-
-
-template<typename PointT>
-typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(typename pcl::PointCloud<PointT>::Ptr cloud, float filterRes, Eigen::Vector4f minPoint, Eigen::Vector4f maxPoint)
+typename pcl::PointCloud<PointT>::Ptr FilterCloud(typename pcl::PointCloud<PointT>::Ptr cloud, float filterRes, Eigen::Vector4f minPoint, Eigen::Vector4f maxPoint)
 {
   // Time segmentation process
   auto startTime = std::chrono::steady_clock::now();
@@ -25,7 +39,7 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
 
 
 template<typename PointT>
-std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::SeparateClouds(pcl::PointIndices::Ptr inliers, typename pcl::PointCloud<PointT>::Ptr cloud) 
+std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> SeparateClouds(pcl::PointIndices::Ptr inliers, typename pcl::PointCloud<PointT>::Ptr cloud)
 {
   // TODO: Create two new point clouds, one cloud with obstacles and other with segmented plane
 
@@ -35,7 +49,7 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT
 
 
 template<typename PointT>
-std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::SegmentPlane(typename pcl::PointCloud<PointT>::Ptr cloud, int maxIterations, float distanceThreshold)
+std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> SegmentPlane(typename pcl::PointCloud<PointT>::Ptr cloud, int maxIterations, float distanceThreshold)
 {
   // Time segmentation process
   auto startTime = std::chrono::steady_clock::now();
@@ -52,7 +66,7 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT
 
 
 template<typename PointT>
-std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::Clustering(typename pcl::PointCloud<PointT>::Ptr cloud, float clusterTolerance, int minSize, int maxSize)
+std::vector<typename pcl::PointCloud<PointT>::Ptr> Clustering(typename pcl::PointCloud<PointT>::Ptr cloud, float clusterTolerance, int minSize, int maxSize)
 {
   // Time clustering process
   auto startTime = std::chrono::steady_clock::now();
@@ -69,8 +83,7 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
 }
 
 
-template<typename PointT>
-Box ProcessPointClouds<PointT>::BoundingBox(typename pcl::PointCloud<PointT>::Ptr cluster)
+template<typename PointT> Box BoundingBox(typename pcl::PointCloud<PointT>::Ptr cluster)
 {
   // Find bounding box for one of the clusters
   PointT minPoint, maxPoint;
@@ -88,36 +101,11 @@ Box ProcessPointClouds<PointT>::BoundingBox(typename pcl::PointCloud<PointT>::Pt
 }
 
 
-template<typename PointT>
-void ProcessPointClouds<PointT>::savePcd(typename pcl::PointCloud<PointT>::Ptr cloud, std::string file)
+template<typename PointT> void savePcd(typename pcl::PointCloud<PointT>::Ptr cloud, std::string file)
 {
   pcl::io::savePCDFileASCII (file, *cloud);
   std::cerr << "Saved " << cloud->points.size () << " data points to "+file << std::endl;
 }
 
 
-template<typename PointT>
-typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::loadPcd(std::string file)
-{
-  typename pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
-
-  if (pcl::io::loadPCDFile<PointT> (file, *cloud) == -1) //* load the file
-  {
-    PCL_ERROR ("Couldn't read file \n");
-  }
-  std::cerr << "Loaded " << cloud->points.size () << " data points from "+file << std::endl;
-
-  return cloud;
-}
-
-
-template<typename PointT>
-std::vector<boost::filesystem::path> ProcessPointClouds<PointT>::streamPcd(std::string dataPath)
-{
-  std::vector<boost::filesystem::path> paths(boost::filesystem::directory_iterator{dataPath}, boost::filesystem::directory_iterator{});
-
-  // sort files in accending order so playback is chronological
-  sort(paths.begin(), paths.end());
-
-  return paths;
-}
+#endif //LIDAR_OBSTACLE_DETECTION_FILTERCLOUD_HPP
