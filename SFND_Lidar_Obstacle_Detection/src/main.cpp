@@ -76,7 +76,7 @@ int main (int argc, char** argv)
     float x_max =  40.;
     float y_min = -10.;
     float y_max =  10.;
-    float z_min =  -2.;  // should cover the ground plan
+    float z_min =  -2.; // should cover the ground plan
     float z_max =   2.;
     filterCloud<pcl::PointXYZI>(cloud, leaf_size, x_min, x_max, y_min, y_max, z_min, z_max);
 
