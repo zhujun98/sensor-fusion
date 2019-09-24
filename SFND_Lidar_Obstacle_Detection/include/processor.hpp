@@ -2,8 +2,8 @@
  * Author: Jun Zhu, zhujun981661@gmail.com
  */
 
-#ifndef LIDAR_OBSTACLE_DETECTION_FILTERCLOUD_HPP
-#define LIDAR_OBSTACLE_DETECTION_FILTERCLOUD_HPP
+#ifndef LIDAR_OBSTACLE_DETECTION_PROCESSOR_HPP
+#define LIDAR_OBSTACLE_DETECTION_PROCESSOR_HPP
 
 #include <pcl/io/pcd_io.h>
 #include <pcl/common/common.h>
@@ -19,7 +19,6 @@
 #include <vector>
 #include <ctime>
 #include <chrono>
-#include "box.h"
 
 
 /**
@@ -27,15 +26,14 @@
  *
  * VoxelGrid filter -> CropBox filter
  *
- * @param cloud:
- * @param leaf_size:
- * @param x_min:
- * @param x_max:
- * @param y_min:
- * @param y_max:
- * @param z_min:
- * @param z_max:
- *
+ * @param cloud: the input point cloud.
+ * @param leaf_size: leaf size used in VoxelGrid filter, in meter.
+ * @param x_min: minimum x of the ROI, in meter.
+ * @param x_max: maximum x of the ROI, in meter
+ * @param y_min: minimum y of the ROI, in meter
+ * @param y_max: maximum y of the ROI, in meter
+ * @param z_min: minimum z of the ROI, in meter
+ * @param z_max: maximum z of the ROI, in meter
  */
 template<typename PointT>
 void filterCloud(typename pcl::PointCloud<PointT>::Ptr cloud, float leaf_size,
@@ -62,74 +60,56 @@ void filterCloud(typename pcl::PointCloud<PointT>::Ptr cloud, float leaf_size,
 }
 
 
+/**
+ * Segment cloud into two parts: ground plane and obstacle.
+ *
+ * @param cloud: the input point cloud.
+ * @param max_iters: maximum number of iterations allowed in the RANSAC algorithm.
+ * @param threshold: distance threshold used in SACMODEL_PLANE.
+ *
+ * @return: the point cloud of the obstacles.
+ */
+
 template<typename PointT>
-std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> SeparateClouds(pcl::PointIndices::Ptr inliers, typename pcl::PointCloud<PointT>::Ptr cloud)
+typename pcl::PointCloud<PointT>::Ptr segmentCloud(typename pcl::PointCloud<PointT>::Ptr cloud,
+                                                   int max_iters,
+                                                   float threshold)
 {
-  // TODO: Create two new point clouds, one cloud with obstacles and other with segmented plane
-
-  std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> segResult(cloud, cloud);
-  return segResult;
-}
-
-
-template<typename PointT>
-std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> SegmentPlane(typename pcl::PointCloud<PointT>::Ptr cloud, int maxIterations, float distanceThreshold)
-{
-  // Time segmentation process
   auto startTime = std::chrono::steady_clock::now();
-  pcl::PointIndices::Ptr inliers;
-  // TODO:: Fill in this function to find inliers for the cloud.
+
+  // use RANSAC to find out the ground plane
+
+  pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
+  pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
+
+  typename pcl::SACSegmentation<PointT> seg;
+  seg.setModelType(pcl::SACMODEL_PLANE);
+  seg.setMethodType(pcl::SAC_RANSAC);
+  seg.setMaxIterations(max_iters);
+  seg.setDistanceThreshold(threshold);
+
+  seg.setInputCloud(cloud);
+  seg.segment(*inliers, *coefficients);
+
+
+  // separate the original cloud into ground plane and obstacles
+
+  typename pcl::ExtractIndices<PointT> et_filter;
+  et_filter.setIndices(inliers);
+  et_filter.setInputCloud(cloud);
+  typename pcl::PointCloud<PointT>::Ptr cloud_obstacles(new pcl::PointCloud<PointT>);
+  et_filter.setNegative(true);
+  et_filter.filter(*cloud_obstacles);
+
+  et_filter.setNegative(false);
+  et_filter.filter(*cloud);
 
   auto endTime = std::chrono::steady_clock::now();
   auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
   std::cout << "plane segmentation took " << elapsedTime.count() << " milliseconds" << std::endl;
 
-  std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> segResult = SeparateClouds(inliers,cloud);
-  return segResult;
+  return cloud_obstacles;
 }
 
 
-template<typename PointT>
-std::vector<typename pcl::PointCloud<PointT>::Ptr> Clustering(typename pcl::PointCloud<PointT>::Ptr cloud, float clusterTolerance, int minSize, int maxSize)
-{
-  // Time clustering process
-  auto startTime = std::chrono::steady_clock::now();
-
-  std::vector<typename pcl::PointCloud<PointT>::Ptr> clusters;
-
-  // TODO:: Fill in the function to perform euclidean clustering to group detected obstacles
-
-  auto endTime = std::chrono::steady_clock::now();
-  auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-  std::cout << "clustering took " << elapsedTime.count() << " milliseconds and found " << clusters.size() << " clusters" << std::endl;
-
-  return clusters;
-}
-
-
-template<typename PointT> Box BoundingBox(typename pcl::PointCloud<PointT>::Ptr cluster)
-{
-  // Find bounding box for one of the clusters
-  PointT minPoint, maxPoint;
-  pcl::getMinMax3D(*cluster, minPoint, maxPoint);
-
-  Box box;
-  box.x_min = minPoint.x;
-  box.y_min = minPoint.y;
-  box.z_min = minPoint.z;
-  box.x_max = maxPoint.x;
-  box.y_max = maxPoint.y;
-  box.z_max = maxPoint.z;
-
-  return box;
-}
-
-
-template<typename PointT> void savePcd(typename pcl::PointCloud<PointT>::Ptr cloud, std::string file)
-{
-  pcl::io::savePCDFileASCII (file, *cloud);
-  std::cerr << "Saved " << cloud->points.size () << " data points to "+file << std::endl;
-}
-
-
-#endif //LIDAR_OBSTACLE_DETECTION_FILTERCLOUD_HPP
+#endif //LIDAR_OBSTACLE_DETECTION_PROCESSOR_HPP
