@@ -1,12 +1,14 @@
+/*
+ * Author: Jun Zhu, zhujun981661@gmail.com
+ */
+
 #include "render.h"
-// using templates for processPointClouds so also include .cpp to help linker
 #include "processor.hpp"
 #include "pcd_streamer.hpp"
 #include "config.hpp"
 
 
-//setAngle: SWITCH CAMERA ANGLE {XY, TopDown, Side, FPS}
-void initCamera(CameraAngle setAngle, pcl::visualization::PCLVisualizer::Ptr& viewer)
+void initCamera(CameraAngle angle, pcl::visualization::PCLVisualizer::Ptr& viewer)
 {
   viewer->setBackgroundColor(0, 0, 0);
 
@@ -15,7 +17,7 @@ void initCamera(CameraAngle setAngle, pcl::visualization::PCLVisualizer::Ptr& vi
 
   int distance = CAMERA_DISTANCE;
 
-  switch(setAngle)
+  switch(angle)
   {
     case XY : viewer->setCameraPosition(-distance, -distance, distance, 1, 1, 0); break;
     case TopDown : viewer->setCameraPosition(0, 0, distance, 1, 0, 1); break;
@@ -23,7 +25,7 @@ void initCamera(CameraAngle setAngle, pcl::visualization::PCLVisualizer::Ptr& vi
     case FPS : viewer->setCameraPosition(-10, 0, 0, 0, 0, 1);
   }
 
-  if(setAngle != FPS) viewer->addCoordinateSystem(1.0);
+  if(angle != FPS) viewer->addCoordinateSystem(1.0);
 }
 
 
@@ -64,8 +66,11 @@ int main (int argc, char** argv)
     std::string filename = it->filename().string();
     std::cerr << "Loaded " << cloud->points.size () << " data points from " + filename << std::endl;
 
+//    renderPointCloud(viewer, cloud, filename); // visualize the raw point cloud
+
     // process the point cloud
 
+    // reduce the number cloud by applying vortex grid filter and Region-of-interest filter
     float leaf_size = 0.2;
     float x_min = -20.;
     float x_max =  40.;
@@ -75,7 +80,12 @@ int main (int argc, char** argv)
     float z_max =   2.;
     filterCloud<pcl::PointXYZI>(cloud, leaf_size, x_min, x_max, y_min, y_max, z_min, z_max);
 
-    renderPointCloud(viewer, cloud, filename);
+    // separate the rest point cloud into two parts: ground plane and obstacles
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_obstacles = segmentCloud<pcl::PointXYZI>(cloud, 100, 0.2);
+
+    // colorize the ground plane and obstacles
+    renderPointCloud(viewer, cloud, "ground", Color(0, 1, 1));
+    renderPointCloud(viewer, cloud_obstacles, "obstacles", Color(1, 1, 0));
 
     // repeated streaming
     if (++it == streamer.end()) it = streamer.begin();
