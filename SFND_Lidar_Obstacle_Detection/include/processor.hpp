@@ -22,19 +22,29 @@
 #include "box.h"
 
 
+/*
+ * Reduce the number of points by applying filters.
+ *
+ * voxel grid filter ->
+ *
+ */
 template<typename PointT>
-typename pcl::PointCloud<PointT>::Ptr FilterCloud(typename pcl::PointCloud<PointT>::Ptr cloud, float filterRes, Eigen::Vector4f minPoint, Eigen::Vector4f maxPoint)
+void filterCloud(typename pcl::PointCloud<PointT>::Ptr cloud,
+                 float filterRes,
+                 const Eigen::Vector4f& minPoint,
+                 const Eigen::Vector4f& maxPoint)
 {
-  // Time segmentation process
   auto startTime = std::chrono::steady_clock::now();
 
-  // TODO:: Fill in the function to do voxel grid point reduction and region based filtering
+  // reduce the number points by applying a voxel grid filter
+  typename pcl::VoxelGrid<PointT> vg_filter;
+  vg_filter.setInputCloud(cloud);
+  vg_filter.setLeafSize(filterRes, filterRes, filterRes);
+  vg_filter.filter(*cloud);
 
   auto endTime = std::chrono::steady_clock::now();
   auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
   std::cout << "filtering took " << elapsedTime.count() << " milliseconds" << std::endl;
-
-  return cloud;
 }
 
 

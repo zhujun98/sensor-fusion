@@ -64,11 +64,11 @@ int main (int argc, char** argv)
     std::string filename = it->filename().string();
     std::cerr << "Loaded " << cloud->points.size () << " data points from " + filename << std::endl;
 
+    // process the point cloud
+
+    filterCloud<pcl::PointXYZI>(cloud, 0.1f);
+
     renderPointCloud(viewer, cloud, filename);
-
-    // TODO:: Create lidar sensor
-
-    // TODO:: Create point processor
 
     // repeated streaming
     if (++it == streamer.end()) it = streamer.begin();
