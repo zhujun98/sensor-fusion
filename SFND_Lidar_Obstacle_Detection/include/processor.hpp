@@ -22,25 +22,39 @@
 #include "box.h"
 
 
-/*
+/**
  * Reduce the number of points by applying filters.
  *
- * voxel grid filter ->
+ * VoxelGrid filter -> CropBox filter
+ *
+ * @param cloud:
+ * @param leaf_size:
+ * @param x_min:
+ * @param x_max:
+ * @param y_min:
+ * @param y_max:
+ * @param z_min:
+ * @param z_max:
  *
  */
 template<typename PointT>
-void filterCloud(typename pcl::PointCloud<PointT>::Ptr cloud,
-                 float filterRes,
-                 const Eigen::Vector4f& minPoint,
-                 const Eigen::Vector4f& maxPoint)
+void filterCloud(typename pcl::PointCloud<PointT>::Ptr cloud, float leaf_size,
+                 float x_min, float x_max, float y_min, float y_max, float z_min, float z_max)
 {
   auto startTime = std::chrono::steady_clock::now();
 
   // reduce the number points by applying a voxel grid filter
   typename pcl::VoxelGrid<PointT> vg_filter;
   vg_filter.setInputCloud(cloud);
-  vg_filter.setLeafSize(filterRes, filterRes, filterRes);
+  vg_filter.setLeafSize(leaf_size, leaf_size, leaf_size);
   vg_filter.filter(*cloud);
+
+  // remove the point cloud outside the region of interest
+  typename pcl::CropBox<PointT> cb_filter;
+  cb_filter.setMin({x_min, y_min, z_min, 1.});
+  cb_filter.setMax({x_max, y_max, z_max, 1.});
+  cb_filter.setInputCloud(cloud);
+  cb_filter.filter(*cloud);
 
   auto endTime = std::chrono::steady_clock::now();
   auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
