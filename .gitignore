@@ -7,6 +7,7 @@ References
 
 *.idea
 cmake-build-debug
+cmake-build-debug-*
 build
 
 *.ipynb_checkpoints

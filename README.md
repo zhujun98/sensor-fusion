@@ -22,3 +22,5 @@ is summarized [here](./KalmanFilter.pdf)
 ![](./misc/UKF_show.png)
 
 ### [3] [LIDAR Obstacle Detection](./SFND_Lidar_Obstacle_Detection)
+
+![Raw data](./misc/raw_lidar_data.png)
