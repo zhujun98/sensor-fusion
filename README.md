@@ -1,6 +1,6 @@
 # Sensor Fusion with Kalman Filter
-Jun Zhu
-[![Build Status](https://travis-ci.org/zhujun98/sensor-fusion.svg?branch=master)](https://travis-ci.org/zhujun98/sensor-fusion)
+
+[![Build Status](https://travis-ci.com/zhujun98/sensor-fusion.svg?branch=master)](https://travis-ci.com/zhujun98/sensor-fusion)
 
 
 ![alt text](./misc/theme.png)
