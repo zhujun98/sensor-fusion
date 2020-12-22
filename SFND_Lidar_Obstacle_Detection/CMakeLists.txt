@@ -19,16 +19,12 @@ list(REMOVE_ITEM PCL_LIBRARIES "vtkproj4")
 
 add_executable(environment
     src/main.cpp
-    src/render.cpp
-    )
+    src/streamer.cpp)
 
 target_include_directories(environment
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/include
-        ${PCL_INCLUDE_DIRS}
-    )
+        ${PROJECT_SOURCE_DIR}/include)
 
 target_link_libraries(environment
     PRIVATE
-        ${PCL_LIBRARIES}
-    )
+        ${PCL_LIBRARIES})
