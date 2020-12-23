@@ -5,6 +5,12 @@
 #ifndef LIDAR_OBSTACLE_DETECTION_PROCESS_HPP
 #define LIDAR_OBSTACLE_DETECTION_PROCESS_HPP
 
+#include <iostream>
+#include <string>
+#include <vector>
+#include <ctime>
+#include <chrono>
+
 #include <pcl/io/pcd_io.h>
 #include <pcl/common/common.h>
 #include <pcl/filters/extract_indices.h>
@@ -14,12 +20,10 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/segmentation/extract_clusters.h>
 #include <pcl/common/transforms.h>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <ctime>
-#include <chrono>
 
+#if !defined(USE_PCL_SEG)
+#include "segmentation.hpp"
+#endif
 
 /**
  * Reduce the number of points by applying filters.
@@ -61,7 +65,7 @@ void filterCloud(typename pcl::PointCloud<T>::Ptr cloud, float leaf_size,
 
 
 /**
- * Segment cloud into two parts: the ground plane and the obstacles.
+ * Segment point cloud into two parts: the ground plane and the obstacles.
  *
  * @param cloud: Input point cloud.
  * @param max_iters: Maximum number of iterations allowed in the RANSAC algorithm.
@@ -80,9 +84,13 @@ segmentCloud(typename pcl::PointCloud<T>::Ptr cloud, int max_iters, float thresh
   pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
   pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
 
+#if defined(USE_PCL_SEG)
   pcl::SACSegmentation<T> seg;
   seg.setModelType(pcl::SACMODEL_PLANE);
   seg.setMethodType(pcl::SAC_RANSAC);
+#else
+  SACSegmentation<T> seg;
+#endif
   seg.setMaxIterations(max_iters);
   seg.setDistanceThreshold(threshold);
 
@@ -111,7 +119,7 @@ segmentCloud(typename pcl::PointCloud<T>::Ptr cloud, int max_iters, float thresh
 
 
 /**
- * Cluster
+ * Cluster point cloud.
  *
  * @param cloud: Input point cloud.
  * @param tolerance: The spatial cluster tolerance as a measure in the L2 Euclidean space.

@@ -36,3 +36,11 @@ $ cmake ..
 $ make
 $ ./environment
 ```
+
+By default, the project uses the in-house implementations for point cloud
+segmentation and clustering. To switch to the [PCL](http://pointclouds.org/)
+implementation, build the project with:
+
+```shell script
+$ cmake .. -DUSE_PCL_SEG=ON -DUSE_PCL_CLUSTER=ON
+```
