@@ -11,18 +11,22 @@
 #include <ctime>
 #include <chrono>
 
-#include <pcl/io/pcd_io.h>
 #include <pcl/common/common.h>
 #include <pcl/filters/extract_indices.h>
-#include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/crop_box.h>
-#include <pcl/kdtree/kdtree.h>
-#include <pcl/segmentation/sac_segmentation.h>
-#include <pcl/segmentation/extract_clusters.h>
-#include <pcl/common/transforms.h>
+#include <pcl/filters/voxel_grid.h>
 
 #if !defined(USE_PCL_SEG)
 #include "segmentation.hpp"
+#else
+#include <pcl/segmentation/sac_segmentation.h>
+#endif
+
+#if !defined(USE_PCL_CLUSTER)
+#include "cluster.hpp"
+#else
+#include <pcl/kdtree/kdtree.h>
+#include <pcl/segmentation/extract_clusters.h>
 #endif
 
 /**
@@ -133,13 +137,17 @@ clusterCloud(typename pcl::PointCloud<T>::Ptr cloud, float tolerance, int min_si
 {
   auto startTime = std::chrono::steady_clock::now();
 
-  std::vector<typename pcl::PointCloud<T>::Ptr> clusters;
-
+#if defined(USE_PCL_CLUSTER)
   typename pcl::search::KdTree<T>::Ptr kd_tree(new pcl::search::KdTree<T>);
-  kd_tree->setInputCloud(cloud);
-
-  std::vector<pcl::PointIndices> cluster_indices;
   pcl::EuclideanClusterExtraction<T> ec;
+#else
+  std::shared_ptr<KdTree<T>> kd_tree(new KdTree<T>());
+  EuclideanClusterExtraction<T> ec;
+#endif
+
+  // Extract indices for different clusters.
+  kd_tree->setInputCloud(cloud);
+  std::vector<pcl::PointIndices> cluster_indices;
   ec.setClusterTolerance(tolerance);
   ec.setMinClusterSize(min_size);
   ec.setMaxClusterSize(max_size);
@@ -147,6 +155,8 @@ clusterCloud(typename pcl::PointCloud<T>::Ptr cloud, float tolerance, int min_si
   ec.setInputCloud(cloud);
   ec.extract(cluster_indices);
 
+  // Construct a vector of point clouds based on cluster indices.
+  std::vector<typename pcl::PointCloud<T>::Ptr> clusters;
   for (const auto& indices : cluster_indices)
   {
     typename pcl::PointCloud<T>::Ptr cluster(new pcl::PointCloud<T>());

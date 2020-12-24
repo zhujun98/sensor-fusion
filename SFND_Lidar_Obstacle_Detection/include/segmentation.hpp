@@ -7,7 +7,12 @@
 
 #include <random>
 
+#include <pcl/common/common.h>
 
+
+/**
+ *  Class for single plane segmentation from a point cloud using RANSAC algorithm.
+ */
 template<typename T>
 class SACSegmentation
 {
