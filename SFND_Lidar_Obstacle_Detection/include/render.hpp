@@ -35,7 +35,7 @@ void renderPointCloud(pcl::visualization::PCLVisualizer::Ptr& viewer,
 {
   if (color == CloudColor::INTENSITY)
   {
-    pcl::visualization::PointCloudColorHandlerGenericField<T> intensity_distribution(cloud, name);
+    pcl::visualization::PointCloudColorHandlerGenericField<T> intensity_distribution(cloud, "intensity");
     viewer->addPointCloud<T>(cloud, intensity_distribution, name);
   } else
   {
@@ -46,7 +46,7 @@ void renderPointCloud(pcl::visualization::PCLVisualizer::Ptr& viewer,
       pcl::getMinMax3D(*cloud, min_pt, max_pt);
 
       // Set the obstacle color by the height.
-      if (max_pt.z - min_pt.z > 1.6)
+      if (max_pt.z - min_pt.z > 1.5)
       {
         r = 0., g = 0., b = 1.;
       } else {
@@ -65,7 +65,7 @@ void renderPointCloud(pcl::visualization::PCLVisualizer::Ptr& viewer,
     viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, r, g, b, name);
   }
 
-  viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, name);
+  viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, name);
 }
 
 #endif // LIDAR_OBJECT_DETECTION_RENDER_HPP

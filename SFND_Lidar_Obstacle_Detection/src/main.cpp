@@ -39,10 +39,15 @@ int main (int argc, char** argv)
   std::string usage_instructions = "Usage: ";
   usage_instructions += argv[0];
   usage_instructions += " data_folder";
+  usage_instructions += " mode(optional)";
 
-  if (argc != 2) {
+  std::string mode = "process";
+  if (argc < 2) {
     std::cerr << usage_instructions << std::endl;
     exit(EXIT_FAILURE);
+  } else if (argc == 3)
+  {
+    mode = argv[2];
   }
 
   std::string data_folder = argv[1];
@@ -54,7 +59,6 @@ int main (int argc, char** argv)
   initCamera(CameraAngle::XY, viewer);
 
   Streamer streamer(data_folder);
-
   while (!viewer->wasStopped())
   {
     viewer->removeAllPointClouds();
@@ -62,26 +66,36 @@ int main (int argc, char** argv)
 
     auto cloud = streamer.next();
 
-//    renderPointCloud(viewer, cloud, filename); // visualize the raw point cloud
+    if (mode == "process")
+    {
+      // Downsampling by applying vortex grid filter and region-of-interest filter.
+      filterCloud<pcl::PointXYZI>(cloud, 0.2, -20, 40, -6.5, 6.5, -2, 2);
 
-    // Downsampling by applying vortex grid filter and region-of-interest filter.
-    filterCloud<pcl::PointXYZI>(cloud, 0.2, -20, 40, -6.5, 6.5, -2, 2);
+      // Separate the filtered point cloud into two parts: ground plane and obstacles.
+      pcl::PointCloud<pcl::PointXYZI>::Ptr obstacle_clouds = segmentCloud<pcl::PointXYZI>(cloud, 100, 0.2);
 
-    // Separate the filtered point cloud into two parts: ground plane and obstacles.
-    pcl::PointCloud<pcl::PointXYZI>::Ptr obstacle_clouds = segmentCloud<pcl::PointXYZI>(cloud, 100, 0.2);
-
-    // Cluster the obstacles.
-    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr>
+      // Cluster the obstacles.
+      std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr>
       obstacle_clusters = clusterCloud<pcl::PointXYZI>(obstacle_clouds, 0.5, 50, 500);
 
-    // Render the ground and the clustered obstacles.
-    renderPointCloud<pcl::PointXYZI>(viewer, cloud, "ground", CloudColor::ROAD);
-    size_t count = 0;
-    for (const auto& cluster : obstacle_clusters)
-    {
-      renderPointCloud<pcl::PointXYZI>(viewer, cluster, "obstacle_" + std::to_string(++count), CloudColor::OBSTACLE);
-    }
+      // Render the ground and the clustered obstacles.
+      renderPointCloud<pcl::PointXYZI>(viewer, cloud, "ground", CloudColor::ROAD);
+      size_t count = 0;
+      for (const auto& cluster : obstacle_clusters)
+      {
+        renderPointCloud<pcl::PointXYZI>(viewer, cluster, "obstacle_" + std::to_string(++count), CloudColor::OBSTACLE);
+      }
 
-    viewer->spinOnce();
+      viewer->spinOnce(10);
+    } else if (mode == "raw")
+    {
+      // visualize the raw point cloud
+      renderPointCloud<pcl::PointXYZI>(viewer, cloud, "raw");
+      viewer->spinOnce(25);
+    } else
+    {
+      std::cerr << "Unknown mode: " << mode << std::endl;
+      exit(EXIT_FAILURE);
+    }
   }
 }
