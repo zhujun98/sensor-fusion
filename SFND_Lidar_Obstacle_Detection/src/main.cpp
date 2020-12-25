@@ -69,14 +69,14 @@ int main (int argc, char** argv)
     if (mode == "process")
     {
       // Downsampling by applying vortex grid filter and region-of-interest filter.
-      filterCloud<pcl::PointXYZI>(cloud, 0.2, -20, 40, -6.5, 6.5, -2, 2);
+      filterCloud<pcl::PointXYZI>(cloud, 0.2, -20, 40, -6.2, 6.2, -2, 2);
 
       // Separate the filtered point cloud into two parts: ground plane and obstacles.
       pcl::PointCloud<pcl::PointXYZI>::Ptr obstacle_clouds = segmentCloud<pcl::PointXYZI>(cloud, 100, 0.2);
 
       // Cluster the obstacles.
       std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr>
-      obstacle_clusters = clusterCloud<pcl::PointXYZI>(obstacle_clouds, 0.5, 50, 500);
+      obstacle_clusters = clusterCloud<pcl::PointXYZI>(obstacle_clouds, 0.5, 10, 500);
 
       // Render the ground and the clustered obstacles.
       renderPointCloud<pcl::PointXYZI>(viewer, cloud, "ground", CloudColor::ROAD);
