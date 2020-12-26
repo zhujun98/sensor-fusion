@@ -46,10 +46,16 @@ void renderPointCloud(pcl::visualization::PCLVisualizer::Ptr& viewer,
       pcl::getMinMax3D(*cloud, min_pt, max_pt);
 
       // Set the obstacle color by the height.
-      if (max_pt.z - min_pt.z > 1.5)
+      if ( (max_pt.x - min_pt.x < 0.5) & (max_pt.y - min_pt.y < 0.5) )
       {
+        // pole
+        r = 1., g = 1., b = 0.;
+      } else if (max_pt.z - min_pt.z > 1.5)
+      {
+        // big car
         r = 0., g = 0., b = 1.;
       } else {
+        // small car
         r = 1., g = 0., b = 0.;
       }
 

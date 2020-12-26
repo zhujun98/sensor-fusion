@@ -76,7 +76,7 @@ int main (int argc, char** argv)
 
       // Cluster the obstacles.
       std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr>
-      obstacle_clusters = clusterCloud<pcl::PointXYZI>(obstacle_clouds, 0.5, 10, 500);
+      obstacle_clusters = clusterCloud<pcl::PointXYZI>(obstacle_clouds, 0.5, 15, 500);
 
       // Render the ground and the clustered obstacles.
       renderPointCloud<pcl::PointXYZI>(viewer, cloud, "ground", CloudColor::ROAD);
