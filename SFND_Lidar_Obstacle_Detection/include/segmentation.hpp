@@ -59,7 +59,7 @@ public:
       double tol = std::sqrt(a * a + b * b + c * c) * threshold_;
       for (size_t i = 0; i < cloud_size; ++i)
       {
-        auto point = cloud_->points[i];
+        auto& point = cloud_->points[i];
         if (std::abs(a * point.x + b * point.y + c * point.z + d) <= tol) curr_indices.push_back(i);
       }
 
