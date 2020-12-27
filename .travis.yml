@@ -16,9 +16,9 @@ matrix:
         - g++-5
         - cmake
     env: COMPILER=gcc GCC=5
-  - os: osx
-    osx_image: xcode9.3
-    compiler: clang
+#  - os: osx
+#    osx_image: xcode9.3
+#    compiler: clang
 
 before_install:
   - |
