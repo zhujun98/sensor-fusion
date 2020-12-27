@@ -1,5 +1,7 @@
 # LIDAR Obstacle Detection
 
+![Raw data 1 ](../misc/raw_lidar_1.gif)
+![Processed data 1](../misc/processed_lidar_1.gif)
 
 ## Dependencies
 
