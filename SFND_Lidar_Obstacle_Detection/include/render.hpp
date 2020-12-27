@@ -46,21 +46,36 @@ void renderPointCloud(pcl::visualization::PCLVisualizer::Ptr& viewer,
       pcl::getMinMax3D(*cloud, min_pt, max_pt);
 
       // Set the obstacle color by the height.
-      if (max_pt.z - min_pt.z > 1.5)
+      if ( (max_pt.x - min_pt.x < 0.5) & (max_pt.y - min_pt.y < 0.5) )
       {
+        // pole
+        r = 1., g = 1., b = 0.;
+      } else if (max_pt.z - min_pt.z > 1.5)
+      {
+        // big car
         r = 0., g = 0., b = 1.;
       } else {
+        // small car
         r = 1., g = 0., b = 0.;
       }
 
-      // Draw a yellow bounding box.
+      // Draw frames of the bounding box in green.
+      std::string frame_name = name + "_wireframe";
+      viewer->addCube(min_pt.x, max_pt.x, min_pt.y, max_pt.y, min_pt.z, max_pt.z, 0.0, 1.0, 0.0, frame_name);
+      viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION,
+                                          pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME,
+                                          frame_name);
+      viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 1., frame_name);
+
+      // Draw transparent surfaces of the bounding box in green.
       std::string box_name = name + "_box";
       viewer->addCube(min_pt.x, max_pt.x, min_pt.y, max_pt.y, min_pt.z, max_pt.z, 0.0, 1.0, 0.0, box_name);
       viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION,
-                                          pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME,
+                                          pcl::visualization::PCL_VISUALIZER_REPRESENTATION_SURFACE,
                                           box_name);
-      viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 1., box_name);
+      viewer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_OPACITY, 0.1, box_name);
     }
+
     viewer->addPointCloud<T>(cloud, name);
     viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_COLOR, r, g, b, name);
   }

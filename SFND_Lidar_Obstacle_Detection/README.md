@@ -1,5 +1,7 @@
 # LIDAR Obstacle Detection
 
+![Raw data 1 ](../misc/raw_lidar_1.gif)
+![Processed data 1](../misc/processed_lidar_1.gif)
 
 ## Dependencies
 
@@ -43,3 +45,21 @@ implementation, build the project with:
 ```shell script
 cmake .. -DUSE_PCL_SEG=ON -DUSE_PCL_CLUSTER=ON && make
 ```
+
+## Algorithms
+
+### RANSAC for plane segmentation
+
+RANSAC (**RAN**dom **SA**mple **C**onsensus) is an iterative method to estimate parameters of a 
+mathematical model from a set of observed data that contains significant outliers.
+
+### k-d tree for Euclidean cluster extraction
+
+A `k-d tree` (**k**-**d**imensional tree) is a space partitioning data structure for organizing
+points in a k-dimensional space. Assuming that we have a `k-d tree` structure for searching the 
+nearest neighbors, the algorithmic steps for that would be:
+
+![](euclidean_cluster_extraction.png)
+
+For more details, one can see 
+[here](https://pcl.readthedocs.io/projects/tutorials/en/latest/cluster_extraction.html#cluster-extraction).
