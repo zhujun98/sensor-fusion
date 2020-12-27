@@ -1,7 +1,6 @@
 # Sensor Fusion with Kalman Filter
 
-[![Build Status](https://travis-ci.com/zhujun98/sensor-fusion.svg?branch=master)](https://travis-ci.com/zhujun98/sensor-fusion)
-
+[![Build Status](https://dev.azure.com/zhujun981661/zhujun981661/_apis/build/status/zhujun98.sensor-fusion?branchName=switch_to_azure_pipeline)](https://dev.azure.com/zhujun981661/zhujun981661/_build/latest?definitionId=3&branchName=switch_to_azure_pipeline)
 
 ![alt text](./misc/theme.png)
 
