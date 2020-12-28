@@ -1,0 +1,42 @@
+trigger:
+  - master
+
+strategy:
+  matrix:
+    ubuntu:
+      CC: gcc
+      CXX: g++
+      IMAGE_NAME: 'ubuntu-16.04'
+    mac:
+      CC: clang
+      CXX: clang++
+      IMAGE_NAME: 'macos-10.15'
+
+pool:
+  vmImage: $(IMAGE_NAME)
+
+steps:
+  - script: echo Hello, world!
+    displayName: 'Run a one-line script'
+
+  - script: |
+      git clone --branch 3.3.7 https://github.com/eigenteam/eigen-git-mirror.git
+      pushd eigen-git-mirror
+      mkdir build && cd build
+      cmake .. && sudo make install
+      popd
+    displayName: 'Install Eigen'
+
+  - script: |
+      pushd EKF
+      mkdir build && cd build
+      cmake .. && make
+      popd
+    displayName: 'Build EKF project'
+
+  - script: |
+      pushd UKF
+      mkdir build && cd build
+      cmake .. && make
+      popd
+    displayName: 'Build UKF project'
