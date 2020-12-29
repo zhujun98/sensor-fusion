@@ -5,22 +5,24 @@
 
 ## Dependencies
 
-To install the latest version of [PCL](http://pointclouds.org/) (currently 1.9.1):
+### Ubuntu 
 
-#### Ubuntu 
+One can build and install `VTK` and `PCL` from source. This is what I did.
 
 ```shell script
+# Prerequisite
+sudo apt install build-essential libgl1-mesa-dev libglu1-mesa-dev
 sudo apt install libflann-dev libboost-all-dev libeigen3-dev 
 
-# build and install VTK
+# Build and install VTK
 git clone --branch v8.2.0 https://github.com/Kitware/VTK.git
 cd VTK
 mkdir build && cd build
-cmake -DCMAKE_BUILD_TYPE=Release ../
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF ../
 make -j4
 sudo make install
 
-# build and install PCL
+# Build and install PCL
 git clone --branch pcl-1.9.1 https://github.com/PointCloudLibrary/pcl.git
 cd pcl
 mkdir build && cd build
@@ -28,6 +30,19 @@ cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_visualization=ON ../
 make -j4
 sudo make install
 ```
+
+Alternatively, one could simply do
+
+```shell
+sudo apt install libpcl-dev
+```
+
+### Mac
+
+```shell
+brew install pcl
+```
+
 
 ## Data
 
