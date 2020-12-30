@@ -18,7 +18,7 @@ OPTION(USE_PCL_CLUSTER "Use kd-tree clustering algorithm implemented in the PCL 
 
 OPTION(BUILD_TEST "BUILD unittest" OFF)
 
-find_package(PCL 1.9.1 REQUIRED)
+find_package(PCL REQUIRED)
 if(PCL_FOUND)
     message(STATUS "Found PCL: ${PCL_VERSION}")
 endif()
@@ -26,10 +26,12 @@ endif()
 add_definitions(${PCL_DEFINITIONS})
 
 if(USE_PCL_SEG)
+    message(STATUS "USE plane segmentation algorithm from PCL")
     add_compile_definitions(USE_PCL_SEG)
 endif()
 
 if(USE_PCL_CLUSTER)
+    message(STATUS "USE clustering algorithm from PCL")
     add_compile_definitions(USE_PCL_CLUSTER)
 endif()
 

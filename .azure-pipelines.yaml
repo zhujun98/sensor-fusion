@@ -40,3 +40,21 @@ steps:
       cmake .. && make
       popd
     displayName: 'Build UKF project'
+
+  - script: |
+      if [[ $(CC) == 'gcc' ]]; then
+        sudo apt install libpcl-dev
+      fi
+      # TODO: FIX me
+      # brew install pcl
+    displayName: 'Install PCL'
+
+  - script: |
+      if [[ $(CC) == 'gcc' ]]; then
+        pushd SFND_Lidar_Obstacle_Detection
+        mkdir build && cd build
+        cmake .. -DBUILD_TEST=ON && make && make test
+        cmake .. -DBUILD_TEST=ON -DUSE_PCL_SEG=ON -DUSE_PCL_CLUSTER=ON && make && make test
+        popd
+      fi
+    displayName: 'Build LIDAR obstacle detection project'
