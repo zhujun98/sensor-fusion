@@ -240,7 +240,7 @@ public:
       pcl::PointIndices point_indices; // store indices of the current cluster
       auto& indices = point_indices.indices;
 
-      // Carry out nearest neighbor search until the current unprocessed queue is empty.
+      // Carry out search of neighbors until the current unprocessed queue is empty.
       unprocessed.push(i);
       while (!unprocessed.empty())
       {

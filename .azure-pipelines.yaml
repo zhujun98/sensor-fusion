@@ -16,8 +16,8 @@ pool:
   vmImage: $(IMAGE_NAME)
 
 steps:
-  - script: echo Hello, world!
-    displayName: 'Run a one-line script'
+  - checkout: self
+    submodules: false
 
   - script: |
       git clone --branch 3.3.7 https://github.com/eigenteam/eigen-git-mirror.git
