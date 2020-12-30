@@ -91,6 +91,28 @@ class KdTree
     return std::sqrt(dx * dx + dy * dy + dz * dz);
   }
 
+  bool checkLeftBoundary(size_t dim, const T& p, const T& n, float tol) const
+  {
+    switch (dim)
+    {
+      case 0: return n.x >= p.x - tol;
+      case 1: return n.y >= p.y - tol;
+      case 2: return n.z >= p.z - tol;
+      default: throw std::out_of_range("Unexpected exception");
+    }
+  }
+
+  bool checkRightBoundary(size_t dim, const T& p, const T& n, float tol) const
+  {
+    switch (dim)
+    {
+      case 0: return n.x <= p.x + tol;
+      case 1: return n.y <= p.y + tol;
+      case 2: return n.z <= p.z + tol;
+      default: throw std::out_of_range("Unexpected exception");
+    }
+  }
+
   void searchNeighborsImp(const T& point,
                           TreeNode* node,
                           float tolerance,
@@ -105,25 +127,15 @@ class KdTree
     if (distance(point, node_point) <= tolerance) neighbors.push_back(index);
 
     // Decide whether to continue search the left and/or right branch of the tree.
-    bool search_left = true;
-    bool search_right = true;
     size_t curr_dim = depth % n_dims_;
-    switch (curr_dim)
+    if (checkLeftBoundary(curr_dim, point, node_point, tolerance))
     {
-      case 0: if (node_point.x < point.x - tolerance) search_left = false;
-        if (node_point.x > point.x + tolerance) search_right = false;
-        break;
-      case 1: if (node_point.y < point.y - tolerance) search_left = false;
-        if (node_point.y > point.y + tolerance) search_right = false;
-        break;
-      case 2: if (node_point.z < point.z - tolerance) search_left = false;
-        if (node_point.z > point.z + tolerance) search_right = false;
-        break;
-      default: throw std::out_of_range("");
+      searchNeighborsImp(point, node->left, tolerance, depth+1, neighbors);
     }
-
-    if (search_left) searchNeighborsImp(point, node->left, tolerance, depth+1, neighbors);
-    if (search_right) searchNeighborsImp(point, node->right, tolerance, depth+1, neighbors);
+    if (checkRightBoundary(curr_dim, point, node_point, tolerance))
+    {
+      searchNeighborsImp(point, node->right, tolerance, depth+1, neighbors);
+    }
   }
 
 public:
