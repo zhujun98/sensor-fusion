@@ -29,6 +29,16 @@ make -j4
 sudo make install
 ```
 
+## Data
+
+The original point cloud data can be found [here](https://github.com/udacity/SFND_Lidar_Obstacle_Detection/tree/master/src/sensors/data/pcd).
+For this project, the data has been included as a submodule and one can simply download it together
+with the repository by
+
+```shell
+git clone --recursive https://github.com/zhujun98/sensor-fusion.git
+```
+
 ## Build and Run
 
 ```shell script
@@ -57,7 +67,7 @@ mathematical model from a set of observed data that contains significant outlier
 
 A `k-d tree` (**k**-**d**imensional tree) is a space partitioning data structure for organizing
 points in a k-dimensional space. Assuming that we have a `k-d tree` structure for searching the 
-nearest neighbors, the algorithmic steps for that would be:
+neighbors within a distance, the algorithmic steps for that would be:
 
 ![](euclidean_cluster_extraction.png)
 
