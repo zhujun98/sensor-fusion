@@ -1,0 +1,109 @@
+\documentclass[12pt]{article}
+
+\title{Algorithms for LIDAR Obstacle Detection}
+\author{Jun Zhu}
+\date{\today}
+
+
+\usepackage[ruled,vlined]{algorithm2e}
+
+\usepackage{geometry}
+\geometry{
+	a4paper,
+	left=20mm,
+	right=20mm,
+	top=20mm,
+	bottom=20mm
+}
+
+\begin{document}
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{algorithm}[H]
+\DontPrintSemicolon
+\SetAlgoLined
+\SetKwInOut{Input}{Input}
+\SetKwInOut{Output}{Output}
+\Input{$D$ - Input point cloud. \\
+       $k$ - Maximum number of iterations allowed. \\
+	     $tol$ - Threshold value to determine whether a point belongs to a plane.
+}
+
+\Output{Points belonging to a plane.}
+
+\BlankLine
+
+Initialize a list to store the best inliners found so far, $bestI$\;
+$iterations \leftarrow 0$\;
+\While{ $iterations < k$ } {
+	  Initialize a list to store inliners for the current iteration,  $I$\;
+    Randomly select 3 points from $D$ and add them to $I$\;
+    Calculate the coefficients of the plane function\;
+		\For{ \normalfont{every point in} $D$ } {
+				Calculate its distance to the plane, $dist$\;
+				\If{ $dist \leq tol$ } {
+						Add this point to $I$\;
+				}
+		}
+		\If{ \normalfont{size of} $I > $ \normalfont{size of} $bestI$ } {
+				$bestI \leftarrow I$\;
+		}
+}
+\caption{RANSAC for 3D point cloud plane segmentation}
+\end{algorithm} 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+
+\begin{algorithm}[H]
+\DontPrintSemicolon
+\SetAlgoLined
+\SetKwInOut{Input}{Input}
+\SetKwInOut{Output}{Output}
+\Input{$p$ - Reference point. \\
+       $root$ - Root node of the k-d tree. \\
+	     $tol$ - Maximum allowed distance for a neighboring point.
+}
+
+\Output{A list of neighboring points.}
+
+\BlankLine
+
+\Begin{
+		Initialize a list to store the neighboring points, $I$\;
+		TreeSearch($p$, $root$, 0, $tol$, $I$)\;
+		return $I$\;
+}
+
+\BlankLine
+
+\SetKwFunction{TreeSearch}{TreeSearch}
+\SetKwProg{Fn}{Function}{:}{}
+\Fn{\TreeSearch{$p$, $node$, $depth$, $tol$, $I$}}{
+		\If{$node == null$} {
+				return\;
+		}
+		Compute the distance between $p$ and $node$, $dist$\;
+		\If{$dist <= tol$} {
+				Add $node$ to $I$\;	
+		}
+		
+		\If{it is worth to travel left} {
+				TreeSearch($p$, left child of $node$, depth+1, $tol$, $I$);	
+		}
+		\If{it is worth to travel right} {
+				TreeSearch($p$, right child of $node$, depth+1, $tol$, $I$);	
+		}
+}
+
+\caption{Find neighbors using k-d tree}
+\end{algorithm} 
+
+\end{document}

@@ -63,13 +63,19 @@ cmake .. -DUSE_PCL_SEG=ON -DUSE_PCL_CLUSTER=ON && make
 RANSAC (**RAN**dom **SA**mple **C**onsensus) is an iterative method to estimate parameters of a 
 mathematical model from a set of observed data that contains significant outliers.
 
+![](misc/ransac_plane_segmentation.png)
+
 ### k-d tree for Euclidean cluster extraction
 
 A `k-d tree` (**k**-**d**imensional tree) is a space partitioning data structure for organizing
 points in a k-dimensional space. Assuming that we have a `k-d tree` structure for searching the 
 neighbors within a distance, the algorithmic steps for that would be:
 
-![](euclidean_cluster_extraction.png)
+![](misc/euclidean_cluster_extraction.png)
 
 For more details, one can see 
 [here](https://pcl.readthedocs.io/projects/tutorials/en/latest/cluster_extraction.html#cluster-extraction).
+
+The algorithm of searching for neighbors in a `k-d tree` would be:
+
+![](misc/kd_tree_neighbor_search.png)
