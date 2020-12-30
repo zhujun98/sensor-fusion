@@ -1,0 +1,3 @@
+[submodule "SFND_Lidar_Obstacle_Detection/data/pcd"]
+	path = SFND_Lidar_Obstacle_Detection/data/pcd
+	url = https://github.com/zhujun98/SFND_Lidar_Obstacle_Detection_Data.git
