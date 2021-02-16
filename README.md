@@ -1,6 +1,6 @@
 # Sensor Fusion with Kalman Filter
 
-[![Build Status](https://dev.azure.com/zhujun981661/zhujun981661/_apis/build/status/zhujun98.sensor-fusion?branchName=switch_to_azure_pipeline)](https://dev.azure.com/zhujun981661/zhujun981661/_build/latest?definitionId=3&branchName=switch_to_azure_pipeline)
+[![Build Status](https://dev.azure.com/zhujun981661/zhujun981661/_apis/build/status/zhujun98.sensor-fusion?branchName=master)](https://dev.azure.com/zhujun981661/zhujun981661/_build/latest?definitionId=3&branchName=master)
 
 ![alt text](./misc/theme.png)
 
